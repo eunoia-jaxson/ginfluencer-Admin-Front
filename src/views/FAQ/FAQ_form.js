@@ -21,6 +21,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import RatioSimpleInlineList2 from "../../components/common/RatioSimpleInlineList2";
 import { VIEW_TYPE } from "../../constants/admin";
 import { makeClearValue } from "../../utils/safe";
+import HoverButton from "../../components/common/HoverButton";
 
 const Index = () => {
   const location = useLocation();
@@ -586,30 +587,6 @@ const ChakraInput = ({ value, placeholder, onChange }) => {
       fontSize="sm"
       placeholder={placeholder}
     />
-  );
-};
-
-const HoverButton = ({ title, w, h, textSize, data, onPass }) => {
-  const handleValidation = async () => {
-    // Implementation for button action can go here
-  };
-
-  return (
-    <Button
-      onClick={handleValidation}
-      width={w}
-      height={h}
-      bg="white"
-      border="1px solid"
-      borderColor="skyblue"
-      color="black"
-      _hover={{ bg: "skyblue", color: "white" }}
-      transition="background-color 0.3s"
-    >
-      <Text fontSize={textSize} fontWeight="medium">
-        {title}
-      </Text>
-    </Button>
   );
 };
 
