@@ -1,6 +1,4 @@
-import { Routes } from "react-router-dom";
-import "./App.css";
-import { Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Admin from "./views/admin";
 import StoreList from "./views/store";
 import StoreForm from "./views/store/store_form";
@@ -11,25 +9,31 @@ import FAQList from "./views/FAQ";
 import Post from "./views/post";
 import AskForm from "./views/ask/ask_form";
 import FAQForm from "./views/FAQ/FAQ_form";
+import Header from "./components/common/Header";
 
 function App() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      <Route path="" element={<Admin />} />
-      <Route path="storeList/" element={<StoreList />}>
-        <Route path="storeForm" element={<StoreForm />} />
-      </Route>
-      <Route path="noticeList" element={<NoticeList />}>
-        <Route path="noticeForm" element={<NoticeForm />} />
-      </Route>
-      <Route path="askList" element={<AskList />}>
-        <Route path="askForm" element={<AskForm />} />
-      </Route>
-      <Route path="FAQList" element={<FAQList />}>
-        <Route path="FAQForm" element={<FAQForm />} />
-      </Route>
-      <Route path="post" element={<Post />} />
-    </Routes>
+    <>
+      {location.pathname === "/" ? null : <Header />}
+      <Routes>
+        <Route path="/" element={<Admin />} />
+        <Route path="storeList" element={<StoreList />}>
+          <Route path="storeForm" element={<StoreForm />} />
+        </Route>
+        <Route path="noticeList" element={<NoticeList />}>
+          <Route path="noticeForm" element={<NoticeForm />} />
+        </Route>
+        <Route path="askList" element={<AskList />}>
+          <Route path="askForm" element={<AskForm />} />
+        </Route>
+        <Route path="FAQList" element={<FAQList />}>
+          <Route path="FAQForm" element={<FAQForm />} />
+        </Route>
+        <Route path="post" element={<Post />} />
+      </Routes>
+    </>
   );
 }
 
