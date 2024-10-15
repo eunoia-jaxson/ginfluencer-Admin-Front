@@ -1,4 +1,4 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from "@chakra-ui/react";
+import { Box, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 import AskForm from "./ask_form";
 import AdminTitle from "../../components/common/AdminTitle";
 import { useMatch, useNavigate } from "react-router-dom";

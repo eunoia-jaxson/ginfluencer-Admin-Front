@@ -54,3 +54,14 @@ export const ASK_TYPE = [
   { id: 4, code: "04", value: "기타" },
   { id: 5, code: "05", value: "학생" },
 ];
+
+export const NOTICE_TYPE = [
+  { id: 0, code: "00", value: "선택" },
+  { id: 1, code: "01", value: "공지" },
+  { id: 2, code: "02", value: "뉴스" },
+];
+
+export const VIEW_TYPE = [
+  { id: 1, code: "Y", value: "공개" },
+  { id: 2, code: "N", value: "비공개" },
+];
