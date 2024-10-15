@@ -10,6 +10,7 @@ import Post from "./views/post";
 import AskForm from "./views/ask/ask_form";
 import FAQForm from "./views/FAQ/FAQ_form";
 import Header from "./components/common/Header";
+import NavBar from "./components/common/NavBar";
 
 function App() {
   const location = useLocation();
@@ -17,6 +18,7 @@ function App() {
   return (
     <>
       {location.pathname === "/" ? null : <Header />}
+      {location.pathname === "/" ? null : <NavBar />}
       <Routes>
         <Route path="/" element={<Admin />} />
         <Route path="storeList" element={<StoreList />}>

@@ -99,6 +99,7 @@ const Admin = () => {
             color="white"
             rounded="none"
             onClick={handleLogin}
+            _hover={{ textDecoration: "none" }}
           >
             로그인
           </Button>
