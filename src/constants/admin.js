@@ -1,3 +1,5 @@
+export const PAGE_SIZE = 10;
+
 export const ADMIN_NAVIGATE_LIST = [
   { title: "공지사항", url: "/noticeList" },
   { title: "1:1 문의", url: "/askList" },
@@ -40,6 +42,15 @@ export const FAQ_TABLE_LAYOUT = [
 ];
 
 export const POST_CATEGORY = [
-  { title: '팝업 띄우기', url: '/post?type=popup' },
-  { title: '기부금 설정', url: '/post?type=donation' },
+  { title: "팝업 띄우기", url: "/post?type=popup" },
+  { title: "기부금 설정", url: "/post?type=donation" },
+];
+
+export const ASK_TYPE = [
+  { id: 0, code: "00", value: "선택" },
+  { id: 1, code: "01", value: "회원정보" },
+  { id: 2, code: "02", value: "선한가게신청" },
+  { id: 3, code: "03", value: "후원" },
+  { id: 4, code: "04", value: "기타" },
+  { id: 5, code: "05", value: "학생" },
 ];

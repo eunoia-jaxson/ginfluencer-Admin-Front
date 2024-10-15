@@ -11,6 +11,7 @@ import AskForm from "./views/ask/ask_form";
 import FAQForm from "./views/FAQ/FAQ_form";
 import Header from "./components/common/Header";
 import NavBar from "./components/common/NavBar";
+import { Flex } from "@chakra-ui/react";
 
 function App() {
   const location = useLocation();
@@ -18,23 +19,25 @@ function App() {
   return (
     <>
       {location.pathname === "/" ? null : <Header />}
-      {location.pathname === "/" ? null : <NavBar />}
-      <Routes>
-        <Route path="/" element={<Admin />} />
-        <Route path="storeList" element={<StoreList />}>
-          <Route path="storeForm" element={<StoreForm />} />
-        </Route>
-        <Route path="noticeList" element={<NoticeList />}>
-          <Route path="noticeForm" element={<NoticeForm />} />
-        </Route>
-        <Route path="askList" element={<AskList />}>
-          <Route path="askForm" element={<AskForm />} />
-        </Route>
-        <Route path="FAQList" element={<FAQList />}>
-          <Route path="FAQForm" element={<FAQForm />} />
-        </Route>
-        <Route path="post" element={<Post />} />
-      </Routes>
+      <Flex justify={"space-between"} align={"flex-start"}>
+        {location.pathname === "/" ? null : <NavBar />}
+        <Routes>
+          <Route path="/" element={<Admin />} />
+          <Route path="storeList" element={<StoreList />}>
+            <Route path="storeForm" element={<StoreForm />} />
+          </Route>
+          <Route path="noticeList" element={<NoticeList />}>
+            <Route path="noticeForm" element={<NoticeForm />} />
+          </Route>
+          <Route path="askList" element={<AskList />}>
+            <Route path="askForm" element={<AskForm />} />
+          </Route>
+          <Route path="FAQList" element={<FAQList />}>
+            <Route path="FAQForm" element={<FAQForm />} />
+          </Route>
+          <Route path="post" element={<Post />} />
+        </Routes>
+      </Flex>
     </>
   );
 }
