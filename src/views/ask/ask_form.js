@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { Quill } from "react-quill";
-import ImageResize from "quill-image-resize";
-import "react-quill/dist/quill.snow.css";
+import { useEffect, useState, useRef } from 'react';
+import { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize';
+import 'react-quill/dist/quill.snow.css';
 import {
   Box,
   Flex,
@@ -15,11 +15,11 @@ import {
   Link,
   Spinner,
   useToast,
-} from "@chakra-ui/react";
-import HoverButton from "../../components/common/HoverButton";
+} from '@chakra-ui/react';
+import HoverButton from '../../components/common/HoverButton';
 // import { AskAPI } from '../../../../api';
-import { useNavigate, useLocation } from "react-router-dom";
-import { makeClearValue } from "../../utils/safe";
+import { useNavigate, useLocation } from 'react-router-dom';
+import { makeClearValue } from '../../utils/safe';
 
 const Index = () => {
   const location = useLocation();
@@ -36,17 +36,17 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const idx = +queryParams.get("idx");
+  const idx = +queryParams.get('idx');
 
   const mimeToExtension = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "application/pdf": ".pdf",
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'application/pdf': '.pdf',
   };
 
   const getExtensionFromMime = (mimeType) => {
-    return mimeToExtension[mimeType] || "";
+    return mimeToExtension[mimeType] || '';
   };
 
   // useEffect(() => {
@@ -78,7 +78,7 @@ const Index = () => {
       if (file.size > MAX_FILE_SIZE) {
         toast({
           title: `${file.name} 파일 크기는 30MB를 초과할 수 없습니다.`,
-          status: "error",
+          status: 'error',
           isClosable: true,
         });
         return null;
@@ -88,8 +88,8 @@ const Index = () => {
         id: null,
         oriName: file.name,
         realName: file.name,
-        state: "new",
-        type: "local",
+        state: 'new',
+        type: 'local',
         file,
       };
     });
@@ -101,7 +101,7 @@ const Index = () => {
   const handleDeleteFileChange = (index) => {
     const fileToDelete = files[index];
 
-    if (fileToDelete.type === "server") {
+    if (fileToDelete.type === 'server') {
       setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
     }
 
@@ -115,7 +115,7 @@ const Index = () => {
   };
 
   const handleCreate = async () => {
-    const userConfirmed = window.confirm("1:1문의를 등록하시겠나요?");
+    const userConfirmed = window.confirm('1:1문의를 등록하시겠나요?');
 
     // if (userConfirmed) {
     //   try {
@@ -137,7 +137,7 @@ const Index = () => {
   };
 
   const handleUpdate = async () => {
-    const userConfirmed = window.confirm("1:1문의를 수정하시겠나요?");
+    const userConfirmed = window.confirm('1:1문의를 수정하시겠나요?');
 
     // if (userConfirmed) {
     //   try {
@@ -161,7 +161,7 @@ const Index = () => {
 
   const handleDelete = async () => {
     const userConfirmed = window.confirm(
-      "1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다."
+      '1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
     );
 
     // if (userConfirmed) {
@@ -181,14 +181,14 @@ const Index = () => {
 
   const handleCancle = () => {
     const userConfirmed = window.confirm(
-      "작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다."
+      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
     );
 
     if (userConfirmed) {
       try {
-        navigate("/askList");
+        navigate('/askList');
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
@@ -198,10 +198,10 @@ const Index = () => {
       const data = { idxs: [...deletedFiles] };
       // await AskAPI.deleteFileAsk({ data });
     } catch (error) {
-      console.log("에러", error);
+      console.log('에러', error);
       toast({
-        title: "파일 삭제 중 오류가 발생했습니다.",
-        status: "error",
+        title: '파일 삭제 중 오류가 발생했습니다.',
+        status: 'error',
         isClosable: true,
       });
     }
@@ -212,13 +212,13 @@ const Index = () => {
     let hasAddedFile = false;
 
     files.forEach((file) => {
-      if (file.state === "new" && file.type === "local") {
-        formData.append("files", file.file);
+      if (file.state === 'new' && file.type === 'local') {
+        formData.append('files', file.file);
         hasAddedFile = true;
       }
     });
 
-    if (!hasAddedFile) return "success";
+    if (!hasAddedFile) return 'success';
 
     // try {
     //   await AskAPI.addFileAsk({ id: idx, data: formData });
@@ -230,7 +230,7 @@ const Index = () => {
   };
 
   const base64ToBlob = (base64) => {
-    const byteString = atob(base64.split(",")[1]);
+    const byteString = atob(base64.split(',')[1]);
     const mimeType = base64.match(/data:(.*?);base64/)[1];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
@@ -246,7 +246,7 @@ const Index = () => {
     const extension = getExtensionFromMime(file.type);
     const fileName = `editor_embeded${extension}`;
 
-    formData.append("file", file, fileName);
+    formData.append('file', file, fileName);
 
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -257,27 +257,27 @@ const Index = () => {
     let answer = quillInstance.current.root.innerHTML;
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(answer, "text/html");
-    const images = doc.querySelectorAll("img");
+    const doc = parser.parseFromString(answer, 'text/html');
+    const images = doc.querySelectorAll('img');
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
       try {
         const base64url = image.src;
 
-        if (base64url.startsWith("data:image")) {
+        if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
           // image.src = downloadUrl;
         }
       } catch (error) {
-        console.error("Error processing image:", error);
+        console.error('Error processing image:', error);
       }
     });
 
     await Promise.all(uploadImageAndChangeURL);
 
     const updatedContents = doc.body.innerHTML;
-    setAsk((prev) => ({ ...prev, answer: updatedContents, answerYn: "Y" }));
+    setAsk((prev) => ({ ...prev, answer: updatedContents, answerYn: 'Y' }));
     setIsContentUpdated(true);
   };
 
@@ -308,7 +308,7 @@ const Index = () => {
           setIsLoading(false);
           navigate(0);
           if (!idx) {
-            navigate("/admin/askList");
+            navigate('/admin/askList');
           }
         } catch (error) {
           console.log(error);
@@ -321,7 +321,7 @@ const Index = () => {
 
   const handleSubmit = async () => {
     if (!quillInstance.current.root.innerHTML) {
-      alert("모든 필수 항목을 입력해주세요.");
+      alert('모든 필수 항목을 입력해주세요.');
       return;
     }
 
@@ -374,40 +374,40 @@ const AskForm = ({
     filePath,
   } = data;
 
-  const askType = ["회원정보", "선한가게신청", "후원", "기타", "학생"];
+  const askType = ['회원정보', '선한가게신청', '후원', '기타', '학생'];
 
   const modules = {
     toolbar: [
       [{ font: [] }],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
       ],
-      ["image"],
+      ['image'],
       [{ align: [] }, { color: [] }, { background: [] }],
-      ["clean"],
+      ['clean'],
     ],
     ImageResize: {
       parchment: {
         image: {
-          attributes: ["width", "height", "align"],
+          attributes: ['width', 'height', 'align'],
         },
       },
     },
   };
 
-  Quill.register("modules/ImageResize", ImageResize);
+  Quill.register('modules/ImageResize', ImageResize);
 
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     quillInstance.current = new Quill(quillElement.current, {
-      theme: "snow",
-      placeholder: "내용을 작성해주세요.",
+      theme: 'snow',
+      placeholder: '내용을 작성해주세요.',
       modules: modules,
     });
     setInitialLoad(false);
@@ -428,12 +428,12 @@ const AskForm = ({
     try {
       if (answer) {
         const quill = quillInstance.current;
-        const formattedAnswer = answer.replace(/\n/g, "<br>");
+        const formattedAnswer = answer.replace(/\n/g, '<br>');
         const delta = quill.clipboard.convert(formattedAnswer);
-        quill.setContents(delta, "silent");
+        quill.setContents(delta, 'silent');
       }
     } catch (error) {
-      console.error("Quill 초기화 실패", error);
+      console.error('Quill 초기화 실패', error);
     }
   }, [answer]);
 
@@ -506,7 +506,7 @@ const AskForm = ({
               <Box
                 id="quill-element"
                 ref={quillElement}
-                style={{ height: "200px" }}
+                style={{ height: '200px' }}
               />
             </Td>
           </Tr>

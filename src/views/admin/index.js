@@ -5,20 +5,20 @@ import {
   Button,
   Heading,
   useBreakpointValue,
-} from "@chakra-ui/react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import headerLogo from "../../assets/images/header_logo.png";
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import headerLogo from '../../assets/images/header_logo.png';
 
 const Admin = () => {
   const padding = useBreakpointValue({ base: 8, md: 12 });
-  const logoWidth = useBreakpointValue({ base: "12rem", md: "16rem" });
-  const logoHeight = useBreakpointValue({ base: "6rem", md: "8rem" });
+  const logoWidth = useBreakpointValue({ base: '12rem', md: '16rem' });
+  const logoHeight = useBreakpointValue({ base: '6rem', md: '8rem' });
 
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    userId: "",
-    passwd: "",
+    userId: '',
+    passwd: '',
   });
 
   const handleChange = (e) => {
@@ -30,23 +30,23 @@ const Admin = () => {
     e.preventDefault();
 
     if (!form.userId || !form.passwd) {
-      alert("빈칸 없이 입력해주세요.");
+      alert('빈칸 없이 입력해주세요.');
       return;
     }
 
     try {
-      if (form.userId === "admin" && form.passwd === "1234") {
-        navigate("/storeList");
+      if (form.userId === 'admin' && form.passwd === '1234') {
+        navigate('/storeList');
       } else {
-        alert("아이디 혹은 비밀번호가 틀렸습니다.");
+        alert('아이디 혹은 비밀번호가 틀렸습니다.');
       }
     } catch (error) {
-      alert("오류가 발생했습니다.");
+      alert('오류가 발생했습니다.');
     }
   };
 
   return (
-    <Flex justify="center" align="center" minH="100vh" p={4}>
+    <Flex justify="center" align="center" minH="100vh" minW="100vw" p={4}>
       <Box
         bg="gray.100"
         p={padding}
@@ -64,7 +64,7 @@ const Admin = () => {
           h={logoHeight}
           mb={4}
         />
-        <Heading size={useBreakpointValue({ base: "md", md: "lg" })} pb={4}>
+        <Heading size={useBreakpointValue({ base: 'md', md: 'lg' })} pb={4}>
           New 관리자 페이지
         </Heading>
         <Flex
@@ -80,7 +80,7 @@ const Admin = () => {
               type="text"
               placeholder="아이디"
               onChange={handleChange}
-              size={useBreakpointValue({ base: "sm", md: "md" })}
+              size={useBreakpointValue({ base: 'sm', md: 'md' })}
               bgColor="white"
             />
             <Input
@@ -88,7 +88,7 @@ const Admin = () => {
               type="password"
               placeholder="패스워드"
               onChange={handleChange}
-              size={useBreakpointValue({ base: "sm", md: "md" })}
+              size={useBreakpointValue({ base: 'sm', md: 'md' })}
               bgColor="white"
             />
           </Flex>
@@ -99,7 +99,7 @@ const Admin = () => {
             color="white"
             rounded="none"
             onClick={handleLogin}
-            _hover={{ textDecoration: "none" }}
+            _hover={{ textDecoration: 'none' }}
           >
             로그인
           </Button>

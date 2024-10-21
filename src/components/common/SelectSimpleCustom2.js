@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   Button,
-  Box,
   Flex,
   Text,
   Icon,
-} from "@chakra-ui/react";
-import { ChevronDownIcon, CheckIcon } from "@chakra-ui/icons";
+} from '@chakra-ui/react';
+import { ChevronDownIcon, CheckIcon } from '@chakra-ui/icons';
 
 export default function SelectSimpleCustom({
   defaultValue,
@@ -31,7 +30,7 @@ export default function SelectSimpleCustom({
 
   const handleSelectChange = (value) => {
     setSelected(value);
-    handleChange({ target: { name: "type", value: value.code } });
+    handleChange({ target: { name: 'type', value: value.code } });
   };
 
   return (
@@ -42,8 +41,8 @@ export default function SelectSimpleCustom({
         bg="white"
         border="1px solid"
         borderColor="gray.200"
-        _focus={{ boxShadow: "outline" }}
-        _hover={{ bg: "gray.50" }}
+        _focus={{ boxShadow: 'outline' }}
+        _hover={{ bg: 'gray.50' }}
         textAlign="left"
         w="full"
         py={1.5}
@@ -56,11 +55,11 @@ export default function SelectSimpleCustom({
           <MenuItem
             key={option.id}
             onClick={() => handleSelectChange(option)}
-            _hover={{ bg: "blue.500", color: "white" }}
+            _hover={{ bg: 'blue.500', color: 'white' }}
           >
             <Flex justify="space-between" align="center" w="full">
               <Text
-                fontWeight={selected.code === option.code ? "bold" : "normal"}
+                fontWeight={selected.code === option.code ? 'bold' : 'normal'}
               >
                 {option.value}
               </Text>
