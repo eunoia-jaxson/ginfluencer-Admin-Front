@@ -7,6 +7,7 @@ export const ADMIN_NAVIGATE_LIST = [
 ];
 
 export const STORE_TABLE_LAYOUT = [
+  { name: "checkbox", value: "", width: "w-1/12" },
   { name: "idx", value: "No.", width: "w-1/12" },
   { name: "regularYn", value: "회원구분", width: "w-1/12" },
   { name: "name", value: "가게명", width: "w-4/12" },
@@ -41,6 +42,12 @@ export const FAQ_TABLE_LAYOUT = [
   { name: "viewYn", value: "노출 여부", width: "w-1/12" },
 ];
 
+export const POPUP_TABLE_LAYOUT = [
+  { name: "idx", value: "No.", width: "w-1/12" },
+  { name: "title", value: "제목", width: "" },
+  { name: "viewYn", value: "노출 여부", width: "w-1/12" },
+];
+
 export const POST_CATEGORY = [
   { title: "팝업 띄우기", url: "/post?type=popup" },
   { title: "기부금 설정", url: "/post?type=donation" },
@@ -64,4 +71,44 @@ export const NOTICE_TYPE = [
 export const VIEW_TYPE = [
   { id: 1, code: "Y", value: "공개" },
   { id: 2, code: "N", value: "비공개" },
+];
+
+export const STORE_TYPE = [
+  { id: 1, code: "01", value: "회원" },
+  { id: 2, code: "02", value: "입금" },
+  { id: 3, code: "03", value: "스티커" },
+  { id: 4, code: "04", value: "키트" },
+  { id: 5, code: "05", value: "업종" },
+];
+
+export const MEMBER_TYPE = [
+  { id: 0, value: "선택" },
+  { id: 1, value: "정회원" },
+  { id: 2, value: "준회원" },
+];
+
+export const PAYMENT_TYPE = [
+  { id: 0, value: "선택" },
+  { id: 1, value: "입금" },
+  { id: 2, value: "미입금" },
+];
+
+export const STICKER_TYPE = [
+  { id: 0, value: "선택" },
+  { id: 1, value: "완료" },
+  { id: 2, value: "대기" },
+];
+
+export const KIT_TYPE = [
+  { id: 0, value: "선택" },
+  { id: 1, value: "완료" },
+  { id: 2, value: "대기" },
+];
+
+export const INDUSTRY_TYPE = [
+  { id: 0, value: "선택" },
+  { id: 1, value: "식음료" },
+  { id: 2, value: "교육" },
+  { id: 3, value: "생활(서비스)" },
+  { id: 4, value: "기타" },
 ];

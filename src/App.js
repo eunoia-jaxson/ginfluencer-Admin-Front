@@ -1,7 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Admin from "./views/admin";
 import StoreList from "./views/store";
-import StoreForm from "./views/store/store_form";
 import NoticeList from "./views/notice";
 import NoticeForm from "./views/notice/notice_form";
 import AskList from "./views/ask";
@@ -23,9 +22,7 @@ function App() {
         {location.pathname === "/" ? null : <NavBar />}
         <Routes>
           <Route path="/" element={<Admin />} />
-          <Route path="storeList" element={<StoreList />}>
-            <Route path="storeForm" element={<StoreForm />} />
-          </Route>
+          <Route path="storeList" element={<StoreList />} />
           <Route path="noticeList" element={<NoticeList />}>
             <Route path="noticeForm" element={<NoticeForm />} />
           </Route>
