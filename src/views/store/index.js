@@ -5,11 +5,15 @@ import {
   Tr,
   Th,
   Tbody,
-  Td,
   Checkbox,
   Select,
   Input,
+  InputGroup,
+  InputRightElement,
+  FormControl,
+  IconButton,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 import AdminTitle from "../../components/common/AdminTitle";
 import { useNavigate } from "react-router-dom";
 import { STORE_TABLE_LAYOUT, PAGE_SIZE, ASK_TYPE } from "../../constants/admin";
@@ -32,7 +36,6 @@ const StoreList = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [selectedStores, setSelectedStores] = useState([]);
 
-  // 선택된 드롭다운 상태
   const [selectedStoreType, setSelectedStoreType] = useState("");
   const [selectedMemberType, setSelectedMemberType] = useState("");
   const [selectedPaymentType, setSelectedPaymentType] = useState("");
@@ -40,26 +43,34 @@ const StoreList = () => {
   const [selectedKitType, setSelectedKitType] = useState("");
   const [selectedIndustryType, setSelectedIndustryType] = useState("");
 
-  const [selectedDate, setSelectedDate] = useState("");
-  const [title, setTitle] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   const navigate = useNavigate();
   const layout = STORE_TABLE_LAYOUT;
   const data = stores;
-  const form = "askForm";
 
   useEffect(() => {
     if (selectedStoreType) {
-      if (selectedStoreType === "01") {
-        setSelectedMemberType(MEMBER_TYPE[0]?.value);
-      } else if (selectedStoreType === "02") {
-        setSelectedPaymentType(PAYMENT_TYPE[0]?.value);
-      } else if (selectedStoreType === "03") {
-        setSelectedStickerType(STICKER_TYPE[0]?.value);
-      } else if (selectedStoreType === "04") {
-        setSelectedKitType(KIT_TYPE[0]?.value);
-      } else if (selectedStoreType === "05") {
-        setSelectedIndustryType(INDUSTRY_TYPE[0]?.value);
+      switch (selectedStoreType) {
+        case "01":
+          setSelectedMemberType(MEMBER_TYPE[0]?.value);
+          break;
+        case "02":
+          setSelectedPaymentType(PAYMENT_TYPE[0]?.value);
+          break;
+        case "03":
+          setSelectedStickerType(STICKER_TYPE[0]?.value);
+          break;
+        case "04":
+          setSelectedKitType(KIT_TYPE[0]?.value);
+          break;
+        case "05":
+          setSelectedIndustryType(INDUSTRY_TYPE[0]?.value);
+          break;
+        default:
+          break;
       }
     }
   }, [selectedStoreType]);
@@ -69,42 +80,24 @@ const StoreList = () => {
   };
 
   const handlePaginationPrev = () => {
-    if (curPages > 0) {
-      setCurPages(curPages - 1);
-    } else {
-      alert("첫 페이지 입니다.");
-    }
+    if (curPages > 0) setCurPages(curPages - 1);
+    else alert("첫 페이지 입니다.");
   };
 
   const handlePaginationNext = () => {
-    if (curPages < totalPages - 1) {
-      setCurPages(curPages + 1);
-    } else {
-      alert("마지막 페이지 입니다.");
-    }
-  };
-
-  const handleToggle = async ({ index, id, enabled }) => {
-    if (id === null || id === undefined) {
-      id = stores[index].idx;
-    }
-
-    try {
-      const data = { viewYn: enabled ? "N" : "Y" };
-    } catch (error) {
-      console.log("에러", error);
-    }
-  };
-
-  const getTypeValueByCode = (code) => {
-    const type = ASK_TYPE.find((item) => item.code === code);
-    return type ? type.value : "Undefined";
+    if (curPages < totalPages - 1) setCurPages(curPages + 1);
+    else alert("마지막 페이지 입니다.");
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const clearValue = makeClearValue(value);
-    setStores({ ...stores, [name]: clearValue });
+    setStores((prevStores) => ({ ...prevStores, [name]: clearValue }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("검색어:", keyword);
   };
 
   const handleSelectAll = (isChecked) => {
@@ -117,11 +110,11 @@ const StoreList = () => {
   };
 
   const handleCheckboxChange = (idx) => {
-    if (selectedStores.includes(idx)) {
-      setSelectedStores(selectedStores.filter((id) => id !== idx));
-    } else {
-      setSelectedStores([...selectedStores, idx]);
-    }
+    setSelectedStores((prevSelected) =>
+      prevSelected.includes(idx)
+        ? prevSelected.filter((id) => id !== idx)
+        : [...prevSelected, idx]
+    );
   };
 
   const handleStoreTypeChange = (event) => {
@@ -154,36 +147,39 @@ const StoreList = () => {
     return (
       <Select
         placeholder="전체"
-        width="120px"
-        ml={4}
+        width="200px"
         value={
-          selectedStoreType
-            ? selectedStoreType === "01"
-              ? selectedMemberType || options[0]?.value
-              : selectedStoreType === "02"
-              ? selectedPaymentType || options[0]?.value
-              : selectedStoreType === "03"
-              ? selectedStickerType || options[0]?.value
-              : selectedStoreType === "04"
-              ? selectedKitType || options[0]?.value
-              : selectedStoreType === "05"
-              ? selectedIndustryType || options[0]?.value
-              : ""
-            : ""
+          selectedStoreType === "01"
+            ? selectedMemberType
+            : selectedStoreType === "02"
+            ? selectedPaymentType
+            : selectedStoreType === "03"
+            ? selectedStickerType
+            : selectedStoreType === "04"
+            ? selectedKitType
+            : selectedIndustryType
         }
         onChange={(e) => {
           const selectedValue = e.target.value;
 
-          if (selectedStoreType === "01") {
-            setSelectedMemberType(selectedValue);
-          } else if (selectedStoreType === "02") {
-            setSelectedPaymentType(selectedValue);
-          } else if (selectedStoreType === "03") {
-            setSelectedStickerType(selectedValue);
-          } else if (selectedStoreType === "04") {
-            setSelectedKitType(selectedValue);
-          } else if (selectedStoreType === "05") {
-            setSelectedIndustryType(selectedValue);
+          switch (selectedStoreType) {
+            case "01":
+              setSelectedMemberType(selectedValue);
+              break;
+            case "02":
+              setSelectedPaymentType(selectedValue);
+              break;
+            case "03":
+              setSelectedStickerType(selectedValue);
+              break;
+            case "04":
+              setSelectedKitType(selectedValue);
+              break;
+            case "05":
+              setSelectedIndustryType(selectedValue);
+              break;
+            default:
+              break;
           }
         }}
       >
@@ -196,52 +192,109 @@ const StoreList = () => {
     );
   };
 
-  return (
-    <Box id="white-box" flex="1" bg="white" p={4}>
-      <Box display="flex" alignItems="center">
-        <AdminTitle hasAddButton={null} title="선한영향력가게 관리" form={""} />
-        <Select
-          placeholder="전체"
-          width="120px"
-          ml={2}
-          value={selectedStoreType}
-          onChange={handleStoreTypeChange}
+  const SearchBar = ({ onSubmit, onChange }) => {
+    return (
+      <FormControl as="form" id="search" onSubmit={onSubmit}>
+        <InputGroup
+          shadow="sm"
+          borderWidth="1px"
+          borderRadius="md"
+          borderColor="gray.300"
+          w="72"
         >
-          {STORE_TYPE.map((type) => (
-            <option key={type.id} value={type.code}>
-              {type.value}
-            </option>
-          ))}
-        </Select>
-        {renderNextSelect()}
+          <Input
+            onChange={onChange}
+            id="keyword"
+            name="keyword"
+            type="text"
+            placeholder=""
+            className="block w-full"
+            py={1.5}
+            pl={4}
+            pr={12}
+            color="gray.900"
+            fontSize="sm"
+            ring={1}
+            ringColor="gray.200"
+            _placeholder={{ color: "gray.400" }}
+            _focus={{ ring: 2, ringColor: "indigo.600" }}
+          />
+          <InputRightElement>
+            <IconButton
+              aria-label="Search"
+              icon={<SearchIcon />}
+              size="sm"
+              onClick={onSubmit}
+              variant="ghost"
+              colorScheme="blue"
+              cursor="pointer"
+            />
+          </InputRightElement>
+        </InputGroup>
+      </FormControl>
+    );
+  };
 
-        <Input
-          type="date"
-          ml={4}
-          width="150px"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        />
-        <Input
-          type="date"
-          ml={4}
-          width="150px"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        />
-        <ChakraInput value={title} onChange={handleChange} placeholder={""} />
+  return (
+    <Box id="white-box" flex="1" bg="white" p={4} width="100%" maxWidth="100%">
+      <Box
+        display="flex"
+        alignItems="center"
+        flexWrap="wrap"
+        justifyContent="space-between"
+        gap={4}
+      >
+        <Box flex="1">
+          <AdminTitle
+            hasAddButton={null}
+            title="선한영향력가게 관리"
+            form={""}
+          />
+        </Box>
+        <Box display="flex" alignItems="center" flex="2" gap={4} width="100%">
+          <Select
+            placeholder="전체"
+            width="200px"
+            value={selectedStoreType}
+            onChange={handleStoreTypeChange}
+          >
+            {STORE_TYPE.map((type) => (
+              <option key={type.id} value={type.code}>
+                {type.value}
+              </option>
+            ))}
+          </Select>
+
+          {renderNextSelect()}
+
+          <Input
+            type="date"
+            width="250px"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+          <Input
+            type="date"
+            width="250px"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+          <SearchBar onSubmit={handleSubmit} onChange={handleChange} />
+        </Box>
       </Box>
 
-      <Box>
+      <Box mt={4} width="100%">
         <Table
           variant="simple"
           bg="white"
           borderWidth="1px"
           tableLayout="fixed"
+          width="100%"
         >
           <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
             <Tr>
-              <Th textAlign="center">
+              <Th textAlign="center" width="50px">
+                {" "}
                 <Checkbox
                   isChecked={
                     selectedStores.length === stores.length &&
@@ -253,7 +306,7 @@ const StoreList = () => {
               {layout.map(({ name, value, width }) => (
                 <Th
                   key={name}
-                  width={width}
+                  width={width || "auto"}
                   px={4}
                   py={2.5}
                   textAlign="center"
@@ -267,82 +320,18 @@ const StoreList = () => {
               ))}
             </Tr>
           </Thead>
-          {/* <Tbody>
-            {data.map((item, index) => (
-              <Tr
-                key={item.idx}
-                borderBottomWidth="1px"
-                borderColor="gray.300"
-                _hover={{ bg: "gray.50" }}
-              >
-                <Td textAlign="center" py={1}>
-                  <Checkbox
-                    isChecked={selectedStores.includes(item.idx)}
-                    onChange={() => handleCheckboxChange(item.idx)}
-                  />
-                </Td>
-                {layout.map(({ name }) => {
-                  const value = item[name];
-                  let tableValue = item[name];
-
-                  if (name === "answerYn") {
-                    return (
-                      <Td key={name} textAlign="center" py={1}>
-                        <Checkbox
-                          isChecked={value === "Y"}
-                          isDisabled
-                          colorScheme="blue"
-                        />
-                      </Td>
-                    );
-                  } else if (name === "type") {
-                    tableValue = getTypeValueByCode(value);
-                  }
-                  return (
-                    <Td key={name} textAlign="center" py={1}>
-                      {tableValue}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody> */}
         </Table>
       </Box>
 
       <PageButtonList
+        onPaginationPrev={handlePaginationPrev}
+        onPaginationNext={handlePaginationNext}
         curPages={curPages}
-        totalElements={totalElements}
-        pageSize={PAGE_SIZE}
         setCurPages={setCurPages}
-        handlePaginationNumber={handlePaginationNumber}
-        handlePaginationPrev={handlePaginationPrev}
-        handlePaginationNext={handlePaginationNext}
+        totalPages={totalPages}
+        onPaginationNumber={handlePaginationNumber}
       />
     </Box>
-  );
-};
-
-const ChakraInput = ({ value, placeholder, onChange }) => {
-  return (
-    <Input
-      type="text"
-      name="title"
-      id="title"
-      value={value}
-      onChange={onChange}
-      borderColor="gray.200"
-      textColor="gray.900"
-      shadow="sm"
-      ring={1}
-      ringColor="gray.300"
-      _placeholder={{ color: "gray.400" }}
-      focusBorderColor="indigo.600"
-      fontSize="sm"
-      placeholder={placeholder}
-      width="250px"
-      ml={4}
-    />
   );
 };
 
