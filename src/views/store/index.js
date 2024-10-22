@@ -90,9 +90,9 @@ const StoreList = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     const clearValue = makeClearValue(value);
-    setStores((prevStores) => ({ ...prevStores, [name]: clearValue }));
+    setKeyword(clearValue);
   };
 
   const handleSubmit = (event) => {
@@ -192,7 +192,14 @@ const StoreList = () => {
     );
   };
 
-  const SearchBar = ({ onSubmit, onChange }) => {
+  const SearchBar = ({ onSubmit }) => {
+    const [keyword, setKeyword] = useState("");
+
+    const handleSubmit = (event) => {
+      event.preventDefault();
+      onSubmit(keyword);
+    };
+
     return (
       <FormControl as="form" id="search" onSubmit={onSubmit}>
         <InputGroup
@@ -203,11 +210,11 @@ const StoreList = () => {
           w="72"
         >
           <Input
-            onChange={onChange}
             id="keyword"
             name="keyword"
             type="text"
             placeholder=""
+            value={keyword}
             className="block w-full"
             py={1.5}
             pl={4}
@@ -218,6 +225,7 @@ const StoreList = () => {
             ringColor="gray.200"
             _placeholder={{ color: "gray.400" }}
             _focus={{ ring: 2, ringColor: "indigo.600" }}
+            onChange={(e) => setKeyword(e.target.value)}
           />
           <InputRightElement>
             <IconButton
