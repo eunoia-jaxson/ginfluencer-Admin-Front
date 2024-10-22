@@ -1,4 +1,5 @@
 import {
+  Flex,
   Box,
   Table,
   Thead,
@@ -12,8 +13,10 @@ import {
   InputRightElement,
   FormControl,
   IconButton,
+  Button,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
+import { useTheme } from "@chakra-ui/react";
 import AdminTitle from "../../components/common/AdminTitle";
 import { useNavigate } from "react-router-dom";
 import { STORE_TABLE_LAYOUT, PAGE_SIZE, ASK_TYPE } from "../../constants/admin";
@@ -50,6 +53,8 @@ const StoreList = () => {
   const navigate = useNavigate();
   const layout = STORE_TABLE_LAYOUT;
   const data = stores;
+
+  const theme = useTheme();
 
   useEffect(() => {
     if (selectedStoreType) {
@@ -339,6 +344,14 @@ const StoreList = () => {
         totalPages={totalPages}
         onPaginationNumber={handlePaginationNumber}
       />
+      <Flex py={4} gap={4}>
+        <Button bg={theme.colors.main} color="white">
+          선택항목 엑셀받기
+        </Button>
+        <Button bg={theme.colors.main} color="white">
+          검색항목 엑셀받기
+        </Button>
+      </Flex>
     </Box>
   );
 };
