@@ -2,6 +2,7 @@
   "name": "ginfluencer-admin-front",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://port-0-goodinfluenceshop-m28yifph9f347243.sel4.cloudtype.app",
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^2.10.2",
