@@ -8,6 +8,7 @@ import FAQList from "./views/FAQ";
 import Post from "./views/post";
 import AskForm from "./views/ask/ask_form";
 import FAQForm from "./views/FAQ/FAQ_form";
+import StoreForm from "./views/store/store_form";
 import Header from "./components/common/Header";
 import NavBar from "./components/common/NavBar";
 import { Flex } from "@chakra-ui/react";
@@ -22,7 +23,9 @@ function App() {
         {location.pathname === "/" ? null : <NavBar />}
         <Routes>
           <Route path="/" element={<Admin />} />
-          <Route path="storeList" element={<StoreList />} />
+          <Route path="storeList" element={<StoreList />}>
+            <Route path="storeForm" element={<StoreForm />} />
+          </Route>
           <Route path="noticeList" element={<NoticeList />}>
             <Route path="noticeForm" element={<NoticeForm />} />
           </Route>

@@ -1,3 +1,5 @@
+import axios from "axios";
+import axiosInstance from "../../api/axiosInstance";
 import {
   Flex,
   Box,
@@ -5,6 +7,7 @@ import {
   Thead,
   Tr,
   Th,
+  Td,
   Tbody,
   Checkbox,
   Select,
@@ -18,7 +21,7 @@ import {
 import { SearchIcon } from "@chakra-ui/icons";
 import { useTheme } from "@chakra-ui/react";
 import AdminTitle from "../../components/common/AdminTitle";
-import { useNavigate } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { STORE_TABLE_LAYOUT, PAGE_SIZE, ASK_TYPE } from "../../constants/admin";
 import { useState, useEffect } from "react";
 import { makeClearValue } from "../../utils/safe";
@@ -31,6 +34,7 @@ import {
   KIT_TYPE,
   INDUSTRY_TYPE,
 } from "../../constants/admin";
+import StoreForm from "./store_form";
 
 const StoreList = () => {
   const [stores, setStores] = useState([]);
@@ -51,10 +55,85 @@ const StoreList = () => {
   const [keyword, setKeyword] = useState("");
 
   const navigate = useNavigate();
+  const match = useMatch("/storeList/storeForm");
   const layout = STORE_TABLE_LAYOUT;
   const data = stores;
+  const form = "storeForm";
 
   const theme = useTheme();
+
+  // 데이터 불러오기 API 함수
+  const fetchAllStores = async () => {
+    try {
+      const response = await axiosInstance.get("/api/admin/stores/get/all");
+      console.log("response:", response.data);
+      if (Array.isArray(response.data)) {
+        setStores(response.data);
+        setTotalElements(response.data.length);
+        setTotalPages(Math.ceil(response.data.length / PAGE_SIZE));
+      } else {
+        console.error("Expected an array, but got:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching stores:", error);
+    }
+  };
+
+  // 특정 가게 불러오기 API 함수
+  const fetchStoreById = async (no) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/admin/stores/get/${no}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching store:", error);
+    }
+  };
+
+  // 가게 등록 API 함수
+  const createStore = async (storeData) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/admin/stores/create`,
+        storeData
+      );
+      fetchAllStores(); // 등록 후 목록을 갱신
+      return response.data;
+    } catch (error) {
+      console.error("Error creating store:", error);
+    }
+  };
+
+  // 가게 업데이트 API 함수
+  const updateStore = async (no, updatedData) => {
+    try {
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/api/admin/stores/update/${no}`,
+        updatedData
+      );
+      fetchAllStores(); // 업데이트 후 목록을 갱신
+    } catch (error) {
+      console.error("Error updating store:", error);
+    }
+  };
+
+  // 가게 삭제 API 함수
+  const deleteStore = async (no) => {
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/api/admin/stores/delete/${no}`
+      );
+      fetchAllStores(); // 삭제 후 목록을 갱신
+    } catch (error) {
+      console.error("Error deleting store:", error);
+    }
+  };
+
+  // 컴포넌트가 마운트될 때 모든 가게 데이터 가져오기
+  useEffect(() => {
+    fetchAllStores();
+  }, []);
 
   useEffect(() => {
     if (selectedStoreType) {
@@ -249,109 +328,106 @@ const StoreList = () => {
   };
 
   return (
-    <Box id="white-box" flex="1" bg="white" p={4} width="100%" maxWidth="100%">
-      <Box
-        display="flex"
-        alignItems="center"
-        flexWrap="wrap"
-        justifyContent="space-between"
-        gap={4}
-      >
-        <Box flex="1">
-          <AdminTitle
-            hasAddButton={null}
-            title="선한영향력가게 관리"
-            form={""}
-          />
-        </Box>
-        <Box display="flex" alignItems="center" flex="2" gap={4} width="100%">
-          <Select
-            placeholder="전체"
-            width="200px"
-            value={selectedStoreType}
-            onChange={handleStoreTypeChange}
-          >
-            {STORE_TYPE.map((type) => (
-              <option key={type.id} value={type.code}>
-                {type.value}
-              </option>
-            ))}
-          </Select>
-
-          {renderNextSelect()}
-
-          <Input
-            type="date"
-            width="250px"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <Input
-            type="date"
-            width="250px"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-          <SearchBar onSubmit={handleSubmit} onChange={handleChange} />
-        </Box>
-      </Box>
-
-      <Box mt={4} width="100%">
-        <Table
-          variant="simple"
-          bg="white"
-          borderWidth="1px"
-          tableLayout="fixed"
-          width="100%"
-        >
-          <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
-            <Tr>
-              <Th textAlign="center" width="50px">
-                {" "}
-                <Checkbox
-                  isChecked={
-                    selectedStores.length === stores.length &&
-                    stores.length >= 0
-                  }
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                />
-              </Th>
-              {layout.map(({ name, value, width }) => (
-                <Th
-                  key={name}
-                  width={width || "auto"}
-                  px={4}
-                  py={2.5}
-                  textAlign="center"
-                  fontSize="sm"
-                  fontWeight="semibold"
-                  whiteSpace="nowrap"
-                  color="gray.600"
-                >
-                  {value}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-        </Table>
-      </Box>
-
-      <PageButtonList
-        onPaginationPrev={handlePaginationPrev}
-        onPaginationNext={handlePaginationNext}
-        curPages={curPages}
-        setCurPages={setCurPages}
-        totalPages={totalPages}
-        onPaginationNumber={handlePaginationNumber}
+    <Box id="white-box" flex="1" bg="white" p={4}>
+      <AdminTitle
+        hasAddButton={!match}
+        title="선한영향력가게 관리"
+        form={form}
       />
-      <Flex py={4} gap={4}>
-        <Button bg={theme.colors.main} color="white">
-          선택항목 엑셀받기
-        </Button>
-        <Button bg={theme.colors.main} color="white">
-          검색항목 엑셀받기
-        </Button>
-      </Flex>
+      {match ? (
+        <Box id="store-form">
+          <StoreForm />
+        </Box>
+      ) : (
+        <Box>
+          <Box display="flex" alignItems="center" flex="2" gap={4} width="100%">
+            <Select
+              placeholder="전체"
+              width="200px"
+              value={selectedStoreType}
+              onChange={handleStoreTypeChange}
+            >
+              {STORE_TYPE.map((type) => (
+                <option key={type.id} value={type.code}>
+                  {type.value}
+                </option>
+              ))}
+            </Select>
+
+            {renderNextSelect()}
+
+            <Input
+              type="date"
+              width="250px"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <Input
+              type="date"
+              width="250px"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+            <SearchBar onSubmit={handleSubmit} onChange={handleChange} />
+          </Box>
+          <Table variant="simple" bg="white" borderWidth="1px">
+            <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
+              <Tr>
+                {layout.map(({ name, value, width }) => (
+                  <Th
+                    key={name}
+                    width={width}
+                    px={4}
+                    py={2.5}
+                    textAlign="center"
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    whiteSpace="nowrap"
+                    color="gray.600"
+                  >
+                    {value}
+                  </Th>
+                ))}
+              </Tr>
+            </Thead>
+            <Tbody>
+              {stores.map((item, index) => (
+                <Tr
+                  key={item.idx}
+                  borderBottomWidth="1px"
+                  borderColor="gray.300"
+                  _hover={{ bg: "gray.50" }}
+                >
+                  {layout.map(({ name }) => {
+                    const value = item[name];
+                    return (
+                      <Td
+                        key={name}
+                        textAlign="center"
+                        p={2}
+                        fontSize="sm"
+                        color="gray.700"
+                        cursor="pointer"
+                        onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                      >
+                        {value}
+                      </Td>
+                    );
+                  })}
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+          <PageButtonList
+            onPaginationPrev={handlePaginationPrev}
+            onPaginationNext={handlePaginationNext}
+            curPages={curPages}
+            setCurPages={setCurPages}
+            totalPages={totalPages}
+            onPaginationNumber={handlePaginationNumber}
+          />
+        </Box>
+      )}
     </Box>
   );
 };
