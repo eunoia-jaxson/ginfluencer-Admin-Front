@@ -15,6 +15,7 @@ import {
   Tr,
   Th,
   Td,
+  ChakraInput,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
@@ -38,9 +39,6 @@ const Index = () => {
   const [deletedFiles, setDeletedFiles] = useState([]);
   const [isContentUpdated, setIsContentUpdated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const quillElement = useRef(null);
-  const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
   const idx = +queryParams.get("idx");
@@ -232,9 +230,8 @@ const Index = () => {
   };
 
   const changeContents = async () => {
-    let contents = quillInstance.current.root.innerHTML;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(contents, "text/html");
+    const doc = parser.parseFromString(popup.content, "text/html");
     const images = doc.querySelectorAll("img");
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
@@ -295,8 +292,9 @@ const Index = () => {
   const handleSubmit = async () => {
     if (
       !popup.title ||
-      !popup.viewYn ||
-      !quillInstance.current.root.innerHTML
+      !popup.isVisible ||
+      !popup.startDate ||
+      !popup.endDate
     ) {
       alert("모든 필수 항목을 입력해주세요.");
       return;
@@ -311,8 +309,6 @@ const Index = () => {
       <PopupForm
         data={popup}
         files={files}
-        quillElement={quillElement}
-        quillInstance={quillInstance}
         onChange={onChange}
         onFileChange={handleFileChange}
         onDeleteFileChange={handleDeleteFileChange}
@@ -326,8 +322,6 @@ const Index = () => {
 const PopupForm = ({
   data,
   files,
-  quillElement,
-  quillInstance,
   onChange,
   onFileChange,
   onDeleteFileChange,
@@ -335,7 +329,7 @@ const PopupForm = ({
   onSubmit,
   onCancel,
 }) => {
-  const { title, contents, type, viewYn } = data;
+  const { title, content, type, isVisible, startDate, endDate } = data;
 
   return (
     <Box
@@ -353,7 +347,7 @@ const PopupForm = ({
           <Tr>
             <Th>제목</Th>
             <Td>
-              <ChakraInput
+              <Input
                 type="text"
                 name="title"
                 value={data.title}
@@ -370,8 +364,8 @@ const PopupForm = ({
             <Th>본문 내용</Th>
             <Td>
               <Textarea
-                name="contents"
-                value={data.contents}
+                name="content"
+                value={data.content}
                 onChange={onChange}
                 rows={4}
                 borderColor="gray.300"
@@ -381,110 +375,69 @@ const PopupForm = ({
           </Tr>
 
           <Tr>
-            <Th>공지사항 인덱스</Th>
+            <Th>팝업 공개 시작일</Th>
             <Td>
-              <NumberInput
-                name="noticeIdx"
-                value={data.noticeIdx}
-                onChange={(valueString) => {
-                  onChange({
-                    target: {
-                      name: "noticeIdx",
-                      value: valueString,
-                    },
-                  });
-                }}
-                min={0}
-                max={100}
+              <Input
+                type="date"
+                name="startDate"
+                value={startDate}
+                onChange={onChange}
                 borderColor="gray.300"
                 focusBorderColor="blue.300"
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </Td>
-          </Tr>
-
-          <Tr>
-            <Th>이미지</Th>
-            <Td>
-              <HoverButton
-                title="파일 선택"
-                w="24"
-                h="8 md:h-10"
-                textSize="xs md:text-sm"
-                data={null}
-                onPass={null}
               />
-              {data.oriName && (
-                <Box mt="2">
-                  <Link
-                    href={`file/notice/popup/${data.realName}`}
-                    download={data.oriName}
-                    style={{ textDecoration: "underline" }}
-                  >
-                    {data.oriName}
-                  </Link>
-                </Box>
-              )}
             </Td>
           </Tr>
 
           <Tr>
-            <Td colSpan={2}>
-              <Flex alignItems="center">
-                <Th>팝업 표시 여부</Th>
-                <Checkbox
-                  isChecked={data.viewYn === "Y"}
-                  onChange={() =>
-                    onChange({
-                      target: {
-                        name: "viewYn",
-                        value: data.viewYn === "Y" ? "N" : "Y",
-                      },
-                    })
-                  }
-                  ml="4"
-                />
-              </Flex>
+            <Th>팝업 공개 종료일</Th>
+            <Td>
+              <Input
+                type="date"
+                name="endDate"
+                value={endDate}
+                onChange={onChange}
+                borderColor="gray.300"
+                focusBorderColor="blue.300"
+              />
+            </Td>
+          </Tr>
+
+          <Tr>
+            <Th>팝업 공개 여부</Th>
+            <Td>
+              <Checkbox
+                name="isVisible"
+                isChecked={isVisible}
+                onChange={(e) =>
+                  onChange({
+                    target: { name: "isVisible", value: e.target.checked },
+                  })
+                }
+              >
+                공개
+              </Checkbox>
+            </Td>
+          </Tr>
+
+          <Tr>
+            <Th>파일</Th>
+            <Td>
+              <Input type="file" multiple onChange={onFileChange} />
             </Td>
           </Tr>
         </Tbody>
       </Table>
 
-      <Button
-        type="submit"
-        colorScheme="blue"
-        w="full"
-        mt="4"
-        isLoading={false}
-      >
-        생성하기
-      </Button>
+      <Flex justify="flex-end" mt={6}>
+        <Button colorScheme="blue" onClick={onSubmit}>
+          저장
+        </Button>
+        <Button variant="ghost" onClick={onCancel} ml={3}>
+          취소
+        </Button>
+      </Flex>
     </Box>
   );
 };
-const ChakraInput = ({ value, placeholder, onChange }) => {
-  return (
-    <Input
-      type="text"
-      name="title"
-      id="title"
-      value={value}
-      onChange={onChange}
-      borderColor="gray.200"
-      textColor="gray.900"
-      shadow="sm"
-      ring={1}
-      ringColor="gray.300"
-      _placeholder={{ color: "gray.400" }}
-      focusBorderColor="indigo.600"
-      fontSize="sm"
-      placeholder={placeholder}
-    />
-  );
-};
+
 export default Index;
