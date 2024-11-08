@@ -83,7 +83,7 @@ const StoreList = () => {
   const fetchStoreById = async (no) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/stores/get/${no}`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/${no}`
       );
       return response.data;
     } catch (error) {
@@ -95,7 +95,7 @@ const StoreList = () => {
   const createStore = async (storeData) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/admin/stores/create`,
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
         storeData
       );
       fetchAllStores(); // 등록 후 목록을 갱신
@@ -109,7 +109,7 @@ const StoreList = () => {
   const updateStore = async (no, updatedData) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/admin/stores/update/${no}`,
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
         updatedData
       );
       fetchAllStores(); // 업데이트 후 목록을 갱신
@@ -122,7 +122,7 @@ const StoreList = () => {
   const deleteStore = async (no) => {
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_URL}/api/admin/stores/delete/${no}`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/delete/${no}`
       );
       fetchAllStores(); // 삭제 후 목록을 갱신
     } catch (error) {
