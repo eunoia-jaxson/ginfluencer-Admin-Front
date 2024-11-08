@@ -1,5 +1,5 @@
-import { useState } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Input,
   Button,
@@ -19,29 +19,35 @@ import {
   Text,
   FormErrorMessage,
 } from "@chakra-ui/react";
+import {
+  MembershipLevel,
+  Category,
+  ProvideTarget1,
+  ProvideTarget2,
+} from "../../constants/admin";
 
 const StoreForm = ({ fetchAllStores }) => {
-  const [level, setLevel] = useState("ASSOCIATE_MEMBER");
+  const [level, setLevel] = useState(MembershipLevel.ASSOCIATE_MEMBER);
   const [businessNumber, setBusinessNumber] = useState("");
   const [enrollDate, setEnrollDate] = useState("");
-  const [representativeName, setRepresentativeName] = useState("");
   const [ceoName, setCeoName] = useState("");
   const [storeEmail, setStoreEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [storeTitle, setStoreTitle] = useState("");
-  const [businessType, setBusinessType] = useState("");
-  const [subBusinessType, setSubBusinessType] = useState("");
+  const [businessTypeBig, setBusinessTypeBig] = useState(null);
+  const [businessTypeMiddle, setBusinessTypeMiddle] = useState("");
   const [storePhoneNumber, setStorePhoneNumber] = useState("");
   const [seeAvailable, setSeeAvailable] = useState(true);
   const [storeAddress, setStoreAddress] = useState("");
   const [storeDetailAddress, setStoreDetailAddress] = useState("");
+  // time -> String 아니고 LocalDateTime(java.time.LocalDateTime)으로 불러와야 함
   const [openTime, setOpenTime] = useState("");
   const [closeTime, setCloseTime] = useState("");
   const [openBreakTime, setOpenBreakTime] = useState("");
   const [closeBreakTime, setCloseBreakTime] = useState("");
-  const [restDays, setRestDays] = useState([]);
+  const [holiDays, setHoliDays] = useState([]);
   const [depositCheck, setDepositCheck] = useState(false);
   const [provideItems, setProvideItems] = useState([
     {
@@ -51,20 +57,34 @@ const StoreForm = ({ fetchAllStores }) => {
       freeProvide: false,
     },
   ]);
-  const [provideTarget1, setProvideTarget1] = useState("CHILD_ONLY");
-  const [provideTarget2, setProvideTarget2] = useState("");
+  const [provideTarget1, setProvideTarget1] = useState(
+    ProvideTarget1.CHILD_ONLY
+  );
+  const [provideTarget2, setProvideTarget2] = useState([]);
   const [snsType1, setSnsType1] = useState("");
-  const [snsName1, setSnsName1] = useState("");
+  const [snsType1Url, setSnsType1Url] = useState("");
   const [snsType2, setSnsType2] = useState("");
-  const [snsName2, setSnsName2] = useState("");
+  const [snsType2Url, setSnsType2Url] = useState("");
   const [storeImgCI, setStoreImgCI] = useState("");
   const [storeImgFront, setStoreImgFront] = useState("");
   const [storeImgInside, setStoreImgInside] = useState("");
   const [storeImgMenupan, setStoreImgMenupan] = useState("");
   const [storeImgMenu, setStoreImgMenu] = useState("");
 
+  const [no, setNo] = useState(0);
+  const [stickerSend, setStickerSend] = useState(false);
+  const [kitSend, setKitSend] = useState(false);
+  const [opened, setOpened] = useState(false);
+
   const [errors, setErrors] = useState({});
   const toast = useToast();
+
+  const middleOptions = businessTypeBig
+    ? Object.keys(businessTypeBig.subCategories).map((key) => ({
+        value: key,
+        label: businessTypeBig.subCategories[key],
+      }))
+    : [];
 
   const handleProvideItemChange = (index, field, value) => {
     const updatedItems = [...provideItems];
@@ -88,14 +108,7 @@ const StoreForm = ({ fetchAllStores }) => {
       newErrors.businessNumber = "사업자번호를 입력해주세요.";
     const enrollDate = /^\d{4}-\d{2}-\d{2}$/;
     if (!enrollDate) newErrors.enrollDate = "가입 연월일을 입력해주세요.";
-    if (!representativeName) {
-      newErrors.representativeName = "대표자 성명을 입력해주세요.";
-    } else if (
-      representativeName.length < 2 ||
-      representativeName.length > 15
-    ) {
-      newErrors.representativeName = "이름은 2~15자 이내로 입력해주세요.";
-    }
+
     if (!ceoName || ceoName.length < 2 || ceoName.length > 15)
       newErrors.ceoName = "이름은 2~15자 이내로 입력해주세요.";
     if (
@@ -128,9 +141,13 @@ const StoreForm = ({ fetchAllStores }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validateForm()) return;
+    // if (!validateForm()) return;
 
     const storeData = {
+      no,
+      stickerSend,
+      kitSend,
+      opened,
       level,
       businessNumber,
       ceoName,
@@ -139,8 +156,8 @@ const StoreForm = ({ fetchAllStores }) => {
       password,
       confirmPassword,
       storeTitle,
-      businessType,
-      subBusinessType,
+      businessTypeBig,
+      businessTypeMiddle,
       storePhoneNumber,
       seeAvailable,
       storeAddress,
@@ -149,15 +166,15 @@ const StoreForm = ({ fetchAllStores }) => {
       closeTime,
       openBreakTime,
       closeBreakTime,
-      restDays,
+      holiDays,
       depositCheck,
       provideItems,
       provideTarget1,
       provideTarget2,
       snsType1,
-      snsName1,
+      snsType1Url,
       snsType2,
-      snsName2,
+      snsType2Url,
       storeImgCI,
       storeImgFront,
       storeImgInside,
@@ -166,8 +183,18 @@ const StoreForm = ({ fetchAllStores }) => {
     };
 
     try {
-      await axiosInstance.post("/api/admin/stores/create", storeData);
-      fetchAllStores(); // Refresh store list
+      // await axiosInstance.post("/api/admin/stores/create", storeData);
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
+        storeData,
+        {
+          headers: {
+            "Content-Type": "application/json", // JSON 형식으로 데이터를 전송
+          },
+        }
+      );
+      console.log("Store created:", response.data);
+      fetchAllStores();
       toast({
         title: "Store added successfully",
         status: "success",
@@ -175,38 +202,38 @@ const StoreForm = ({ fetchAllStores }) => {
         isClosable: true,
       });
       // Reset form fields
-      setLevel("ASSOCIATE_MEMBER");
-      setBusinessNumber("");
-      setCeoName("");
-      setStoreEmail("");
-      setPhoneNumber("");
-      setPassword("");
-      setConfirmPassword("");
-      setStoreTitle("");
-      setBusinessType("");
-      setSubBusinessType("");
-      setStorePhoneNumber("");
-      setSeeAvailable(true);
-      setStoreAddress("");
-      setStoreDetailAddress("");
-      setOpenTime("");
-      setCloseTime("");
-      setOpenBreakTime("");
-      setCloseBreakTime("");
-      setRestDays([]);
-      setDepositCheck(false);
-      setProvideItems([]);
-      setProvideTarget1("CHILD_ONLY");
-      setProvideTarget2("");
-      setSnsType1("");
-      setSnsName1("");
-      setSnsType2("");
-      setSnsName2("");
-      setStoreImgCI("");
-      setStoreImgFront("");
-      setStoreImgInside("");
-      setStoreImgMenupan("");
-      setStoreImgMenu("");
+      // setLevel("ASSOCIATE_MEMBER");
+      // setBusinessNumber("");
+      // setCeoName("");
+      // setStoreEmail("");
+      // setPhoneNumber("");
+      // setPassword("");
+      // setConfirmPassword("");
+      // setStoreTitle("");
+      // setBusinessTypeBig("");
+      // setBusinessTypeMiddle("");
+      // setStorePhoneNumber("");
+      // setSeeAvailable(true);
+      // setStoreAddress("");
+      // setStoreDetailAddress("");
+      // setOpenTime("");
+      // setCloseTime("");
+      // setOpenBreakTime("");
+      // setCloseBreakTime("");
+      // setHoliDays([]);
+      // setDepositCheck(false);
+      // setProvideItems([]);
+      // setProvideTarget1("CHILD_ONLY");
+      // setProvideTarget2("");
+      // setSnsType1("");
+      // setSnsType1Url("");
+      // setSnsType2("");
+      // setSnsType2Url("");
+      // setStoreImgCI("");
+      // setStoreImgFront("");
+      // setStoreImgInside("");
+      // setStoreImgMenupan("");
+      // setStoreImgMenu("");
     } catch (error) {
       console.error("Error creating store:", error);
       toast({
@@ -219,6 +246,14 @@ const StoreForm = ({ fetchAllStores }) => {
     }
   };
 
+  // useEffect(() => {
+  //   if (businessTypeBig) {
+  //     setMiddleOptions(categoryData[businessTypeBig].subCategories);
+  //     setBusinessTypeMiddle(""); // 선택 초기화
+  //   } else {
+  //     setMiddleOptions([]);
+  //   }
+  // }, [businessTypeBig]);
   return (
     <Box p={5} width="100%" mx="auto" height="70vh" overflow="auto">
       <form onSubmit={handleSubmit}>
@@ -229,8 +264,8 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">회원구분</FormLabel>
             <RadioGroup value={level} onChange={setLevel}>
               <HStack spacing={4}>
-                <Radio value="REGULAR_MEMBER">정회원</Radio>
-                <Radio value="ASSOCIATE_MEMBER">준회원</Radio>
+                <Radio value={MembershipLevel.REGULAR_MEMBER}>정회원</Radio>
+                <Radio value={MembershipLevel.ASSOCIATE_MEMBER}>준회원</Radio>
               </HStack>
             </RadioGroup>
             <Text fontSize="sm" color="gray.500" mt={2}>
@@ -260,14 +295,14 @@ const StoreForm = ({ fetchAllStores }) => {
             />
             <FormErrorMessage>{errors.enrollDate}</FormErrorMessage>
           </FormControl>
-          <FormControl isRequired isInvalid={errors.representativeName}>
+          <FormControl isRequired isInvalid={errors.ceoName}>
             <Input
               type="text"
-              value={representativeName}
-              onChange={(e) => setRepresentativeName(e.target.value)}
+              value={ceoName}
+              onChange={(e) => setCeoName(e.target.value)}
               placeholder="대표자 성명"
             />
-            <FormErrorMessage>{errors.representativeName}</FormErrorMessage>
+            <FormErrorMessage>{errors.ceoName}</FormErrorMessage>
           </FormControl>
           <FormControl isRequired>
             <FormLabel fontSize="18px">이름</FormLabel>
@@ -294,7 +329,7 @@ const StoreForm = ({ fetchAllStores }) => {
           <FormControl isRequired>
             <FormLabel fontSize="18px">휴대폰</FormLabel>
             <Input
-              type="tel"
+              type="text"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="'-'을 포함해 입력해주세요"
@@ -343,14 +378,37 @@ const StoreForm = ({ fetchAllStores }) => {
           </FormControl>
           <FormControl isRequired>
             <FormLabel fontSize="18px">업종</FormLabel>
+            {/* 대분류 (Category) 선택 */}
             <Select
-              value={businessType}
-              onChange={(e) => setBusinessType(e.target.value)}
+              id="business-type-big"
+              placeholder="대분류"
+              value={businessTypeBig ? businessTypeBig.description : ""}
+              onChange={(e) => {
+                const selectedCategory = Category[e.target.value]; // Category 객체 찾기
+                setBusinessTypeBig(selectedCategory);
+                setBusinessTypeMiddle(""); // 대분류 변경 시 중분류 초기화
+              }}
             >
-              <option value="식음료">식음료</option>
-              <option value="교육">교육</option>
-              <option value="생활">생활</option>
-              <option value="기타">기타</option>
+              {Object.keys(Category).map((key) => (
+                <option key={key} value={key}>
+                  {Category[key].description}
+                </option>
+              ))}
+            </Select>
+
+            {/* 중분류 (SubCategory) 선택 */}
+            <Select
+              id="business-type-middle"
+              placeholder="중분류"
+              value={businessTypeMiddle}
+              onChange={(e) => setBusinessTypeMiddle(e.target.value)}
+              isDisabled={!businessTypeBig} // 대분류 선택이 없을 시 비활성화
+            >
+              {middleOptions.map((subCategory) => (
+                <option key={subCategory.value} value={subCategory.value}>
+                  {subCategory.label}
+                </option>
+              ))}
             </Select>
           </FormControl>
           <FormControl isRequired>
@@ -378,12 +436,14 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">주소</FormLabel>
             <VStack>
               <Input
+                id="postcode"
                 type="text"
                 value={storeAddress}
                 onChange={(e) => setStoreAddress(e.target.value)}
                 placeholder="우편번호"
               />
               <Input
+                id="detail-address"
                 type="text"
                 value={storeDetailAddress}
                 onChange={(e) => setStoreDetailAddress(e.target.value)}
@@ -399,12 +459,14 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">영업시간</FormLabel>
             <HStack>
               <Input
+                id="open-time"
                 type="time"
                 value={openTime}
                 onChange={(e) => setOpenTime(e.target.value)}
               />
               <Text>-</Text>
               <Input
+                id="close-time"
                 type="time"
                 value={closeTime}
                 onChange={(e) => setCloseTime(e.target.value)}
@@ -416,12 +478,14 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">브레이크 타임</FormLabel>
             <HStack>
               <Input
+                id="open-break-time"
                 type="time"
                 value={openBreakTime}
                 onChange={(e) => setOpenBreakTime(e.target.value)}
               />
               <Text>-</Text>
               <Input
+                id="close-break-time"
                 type="time"
                 value={closeBreakTime}
                 onChange={(e) => setCloseBreakTime(e.target.value)}
@@ -433,23 +497,25 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">휴무일</FormLabel>
             <HStack spacing={4}>
               {[
-                { restDays: "Monday", label: "월" },
-                { restDays: "Tuesday", label: "화" },
-                { restDays: "Wednesday", label: "수" },
-                { restDays: "Thursday", label: "목" },
-                { restDays: "Friday", label: "금" },
-                { restDays: "Saturday", label: "토" },
-                { restDays: "Sunday", label: "일" },
-                { restDays: "National Holiday", label: "공휴일" },
-              ].map(({ restDays, label }) => (
+                { holiDays: "Monday", label: "월" },
+                { holiDays: "Tuesday", label: "화" },
+                { holiDays: "Wednesday", label: "수" },
+                { holiDays: "Thursday", label: "목" },
+                { holiDays: "Friday", label: "금" },
+                { holiDays: "Saturday", label: "토" },
+                { holiDays: "Sunday", label: "일" },
+                { holiDays: "National Holiday", label: "공휴일" },
+                { holiDays: "Anytime", label: "상시 변경" },
+              ].map(({ holiDays, label }) => (
                 <Checkbox
-                  key={restDays}
-                  value={restDays}
+                  key={holiDays}
+                  id={`checkbox-${holiDays}`}
+                  value={holiDays}
                   onChange={(e) =>
-                    setRestDays((prev) =>
+                    setHoliDays((prev) =>
                       e.target.checked
-                        ? [...prev, restDays]
-                        : prev.filter((item) => item !== restDays)
+                        ? [...prev, holiDays]
+                        : prev.filter((item) => item !== holiDays)
                     )
                   }
                 >
@@ -528,10 +594,10 @@ const StoreForm = ({ fetchAllStores }) => {
               onChange={(value) => setProvideTarget1(value)}
             >
               <HStack>
-                <Radio value="CHILD_ONLY">아이 본인만</Radio>
-                <Radio value="WITH_ONE">동반 1인</Radio>
-                <Radio value="WITH_TWO">동반 2인</Radio>
-                <Radio value="OTHER">기타</Radio>
+                <Radio value={ProvideTarget1.CHILD_ONLY}>아이 본인만</Radio>
+                <Radio value={ProvideTarget1.WITH_ONE}>동반 1인</Radio>
+                <Radio value={ProvideTarget1.WITH_TWO}>동반 2인</Radio>
+                <Radio value={ProvideTarget1.OTHER}>기타</Radio>
                 {/* 기타 선택할 경우 사용자 입력할 수 있도록 Input 활성화 시키기 */}
               </HStack>
             </RadioGroup>
@@ -540,12 +606,16 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">제공대상2</FormLabel>
             <HStack spacing={4}>
               {[
-                { provideTarget2: "UNDERPRIVILEGED_CHILD", label: "결식아동" },
-                { provideTarget2: "FIREFIGHTER", label: "소방관" },
-                { provideTarget2: "OTHER", label: "기타" },
+                {
+                  provideTarget2: ProvideTarget2.UNDERPRIVILEGED_CHILD,
+                  label: "결식아동",
+                },
+                { provideTarget2: ProvideTarget2.FIREFIGHTER, label: "소방관" },
+                { provideTarget2: ProvideTarget2.OTHER, label: "기타" },
               ].map(({ provideTarget2, label }) => (
                 <Checkbox
                   key={provideTarget2}
+                  id={`checkbox-${provideTarget2}`}
                   value={provideTarget2}
                   onChange={(e) =>
                     setProvideTarget2((prev) =>
@@ -564,42 +634,48 @@ const StoreForm = ({ fetchAllStores }) => {
             <FormLabel fontSize="18px">가게 SNS</FormLabel>
             <HStack>
               <Select
+                id="sns-type-1"
+                placeholder="SNS"
                 value={snsType1}
                 onChange={(e) => setSnsType1(e.target.value)}
               >
-                <option value="식음료">인스타그램</option>
-                <option value="교육">카카오</option>
-                <option value="생활">유튜브</option>
-                <option value="기타">트위터</option>
-                <option value="기타">밴드</option>
-                <option value="기타">네이버 블로그</option>
-                <option value="기타">기타</option>
+                <option value="INSTA">Instagram</option>
+                <option value="KAKAO">KakaoTalk</option>
+                <option value="YOUTUBE">YouTube</option>
+                <option value="TWITTER">Twitter</option>
+                <option value="BAND">Band</option>
+                <option value="NBLOG">Naver Blog</option>
+                <option value="ETC">Other</option>
               </Select>
               <Input
+                id="sns-url-1"
                 type="text"
-                value={snsName1}
-                onChange={(e) => setSnsName1(e.target.value)}
-                placeholder="가게 SNS를 입력하세요."
+                value={snsType1Url}
+                onChange={(e) => setSnsType1Url(e.target.value)}
+                placeholder="가게 SNS URL을 입력하세요."
               />
             </HStack>
             <HStack>
               <Select
+                id="sns-type-2"
+                placeholder="SNS"
                 value={snsType2}
                 onChange={(e) => setSnsType2(e.target.value)}
               >
-                <option value="식음료">인스타그램</option>
-                <option value="교육">카카오</option>
-                <option value="생활">유튜브</option>
-                <option value="기타">트위터</option>
-                <option value="기타">밴드</option>
-                <option value="기타">네이버 블로그</option>
-                <option value="기타">기타</option>
+                <option value="INSTA">Instagram</option>
+                <option value="KAKAO">KakaoTalk</option>
+                <option value="YOUTUBE">YouTube</option>
+                <option value="TWITTER">Twitter</option>
+                <option value="BAND">Band</option>
+                <option value="NBLOG">Naver Blog</option>
+                <option value="ETC">Other</option>
               </Select>
               <Input
+                id="sns-url-2"
                 type="text"
-                value={snsName2}
-                onChange={(e) => setSnsName2(e.target.value)}
-                placeholder="가게 SNS를 입력하세요."
+                value={snsType2Url}
+                onChange={(e) => setSnsType2Url(e.target.value)}
+                placeholder="가게 SNS URL을 입력하세요."
               />
             </HStack>
           </FormControl>
@@ -677,6 +753,32 @@ const StoreForm = ({ fetchAllStores }) => {
             </VStack>
           </FormControl>
 
+          {/* 추가된 파라미터들 */}
+          <FormControl isRequired>
+            <FormLabel fontSize="18px">no</FormLabel>
+            <Input
+              type="number"
+              value={no}
+              onChange={(e) => setNo(e.target.value)}
+              placeholder="고유 번호를 입력하세요."
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontSize="18px">스티커 발송 여부</FormLabel>
+            <Switch
+              isChecked={stickerSend}
+              onChange={(e) => setStickerSend(e.target.checked)}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontSize="18px">키트 발송 여부</FormLabel>
+            <Switch
+              isChecked={kitSend}
+              onChange={(e) => setKitSend(e.target.checked)}
+            />
+          </FormControl>
           <Button type="submit" colorScheme="blue" width="full" mt={4}>
             매장 등록
           </Button>

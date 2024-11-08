@@ -112,3 +112,70 @@ export const INDUSTRY_TYPE = [
   { id: 3, value: "생활(서비스)" },
   { id: 4, value: "기타" },
 ];
+
+export const MembershipLevel = {
+  REGULAR_MEMBER: "REGULAR_MEMBER",
+  ASSOCIATE_MEMBER: "ASSOCIATE_MEMBER",
+};
+
+export const Category = {
+  FOOD: {
+    description: "식음료",
+    subCategories: {
+      KOREAN: "한식",
+      CHINESE: "중식",
+      JAPANESE: "일식",
+      WESTERN: "양식",
+      GENERAL: "일반음식",
+      FAST_FOOD: "패스트푸드",
+      COFFEE_SHOP: "커피전문점",
+      BAKERY: "제과점",
+      ENTERTAINMENT_BAR: "유흥주점",
+      DANRAN_BAR: "단란주점",
+      BEER_HALL: "맥주홀",
+    },
+  },
+  EDUCATION: {
+    description: "교육",
+    subCategories: {
+      WORKSHOP: "체험(공방)",
+      VOCATIONAL_ACADEMY: "직업전문학원",
+      STUDY_CAFE: "스터디카페",
+      SPORTS: "운동",
+    },
+  },
+  SERVICE: {
+    description: "생활(서비스)",
+    subCategories: {
+      OPTICS: "안경",
+      BEAUTY: "미용",
+      FLOWERS: "꽃",
+      ACCOMMODATION_TRAVEL: "숙박/여행",
+      MACHINERY: "기계",
+      MEDICAL: "의료",
+      STUDIO: "스튜디오",
+    },
+  },
+  OTHER: {
+    description: "기타",
+    subCategories: {
+      SUPERMARKET: "슈퍼마켓",
+      BUTCHERY: "정육점",
+      FOOD_SUPPLIES: "식품잡화",
+      CONVENIENCE_STORE: "편의점",
+    },
+  },
+};
+
+export const ProvideTarget1 = {
+  CHILD_ONLY: "CHILD_ONLY",
+  WITH_ONE: "WITH_ONE",
+  WITH_TWO: "WITH_TWO",
+  OTHER: "OTHER",
+};
+
+export const ProvideTarget2 = {
+  UNDERPRIVILEGED_CHILD: "UNDERPRIVILEGED_CHILD",
+  FIREFIGHTER: "FIREFIGHTER",
+  OTHER: "OTHER",
+};
