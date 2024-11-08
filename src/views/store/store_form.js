@@ -24,6 +24,7 @@ import {
   Category,
   ProvideTarget1,
   ProvideTarget2,
+  SnsType,
 } from "../../constants/admin";
 
 const StoreForm = ({ fetchAllStores }) => {
@@ -42,7 +43,6 @@ const StoreForm = ({ fetchAllStores }) => {
   const [seeAvailable, setSeeAvailable] = useState(true);
   const [storeAddress, setStoreAddress] = useState("");
   const [storeDetailAddress, setStoreDetailAddress] = useState("");
-  // time -> String 아니고 LocalDateTime(java.time.LocalDateTime)으로 불러와야 함
   const [openTime, setOpenTime] = useState("");
   const [closeTime, setCloseTime] = useState("");
   const [openBreakTime, setOpenBreakTime] = useState("");
@@ -52,8 +52,8 @@ const StoreForm = ({ fetchAllStores }) => {
   const [provideItems, setProvideItems] = useState([
     {
       name: "",
-      existingPrice: "",
-      providePrice: "",
+      existingPrice: 0,
+      providePrice: 0,
       freeProvide: false,
     },
   ]);
@@ -80,15 +80,21 @@ const StoreForm = ({ fetchAllStores }) => {
   const toast = useToast();
 
   const middleOptions = businessTypeBig
-    ? Object.keys(businessTypeBig.subCategories).map((key) => ({
+    ? Object.keys(Category[businessTypeBig].subCategories).map((key) => ({
         value: key,
-        label: businessTypeBig.subCategories[key],
+        label: Category[businessTypeBig].subCategories[key],
       }))
     : [];
 
   const handleProvideItemChange = (index, field, value) => {
     const updatedItems = [...provideItems];
+    // 숫자 입력값 처리
+    if (field === "existingPrice" || field === "providePrice") {
+      value = parseFloat(value) || 0;
+    }
+
     updatedItems[index][field] = value;
+
     if (field === "freeProvide" && value === true) {
       updatedItems[index].providePrice = 0;
     }
@@ -98,7 +104,7 @@ const StoreForm = ({ fetchAllStores }) => {
   const handleAddProvideItem = () => {
     setProvideItems([
       ...provideItems,
-      { name: "", existingPrice: "", providePrice: "", freeProvide: false },
+      { name: "", existingPrice: 0, providePrice: 0, freeProvide: false },
     ]);
   };
 
@@ -139,6 +145,26 @@ const StoreForm = ({ fetchAllStores }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  useEffect(() => {
+    // 현재 저장된 마지막 `no`를 가져오는 함수 예시
+    const fetchLatestNo = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/latestNo`
+        );
+        const latestNo = response.data.latestNo; // 서버에서 마지막 `no` 값 반환
+        setNo(latestNo + 1); // 마지막 `no`에 +1하여 초기화
+      } catch (error) {
+        console.error("Error fetching latest no:", error);
+        setNo(1); // 오류 시 기본값으로 1을 설정
+      }
+    };
+    fetchLatestNo();
+  }, []);
+  const formatTimeToServer = (time) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
+    return `${today}T${time}:00`; // YYYY-MM-DDTHH:mm:ss 형식으로 반환
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
     // if (!validateForm()) return;
@@ -150,22 +176,23 @@ const StoreForm = ({ fetchAllStores }) => {
       opened,
       level,
       businessNumber,
+      enrollDate,
       ceoName,
       storeEmail,
       phoneNumber,
       password,
       confirmPassword,
       storeTitle,
-      businessTypeBig,
-      businessTypeMiddle,
+      businessTypeBig: businessTypeBig,
+      businessTypeMiddle: businessTypeMiddle,
       storePhoneNumber,
       seeAvailable,
       storeAddress,
       storeDetailAddress,
-      openTime,
-      closeTime,
-      openBreakTime,
-      closeBreakTime,
+      openTime: formatTimeToServer(openTime),
+      closeTime: formatTimeToServer(closeTime),
+      openBreakTime: formatTimeToServer(openBreakTime),
+      closeBreakTime: formatTimeToServer(closeBreakTime),
       holiDays,
       depositCheck,
       provideItems,
@@ -190,6 +217,9 @@ const StoreForm = ({ fetchAllStores }) => {
         {
           headers: {
             "Content-Type": "application/json", // JSON 형식으로 데이터를 전송
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": `http://localhost:3000`,
+            "Access-Control-Allow-Credentials": "true",
           },
         }
       );
@@ -234,6 +264,7 @@ const StoreForm = ({ fetchAllStores }) => {
       // setStoreImgInside("");
       // setStoreImgMenupan("");
       // setStoreImgMenu("");
+      setNo((prevNo) => prevNo + 1);
     } catch (error) {
       console.error("Error creating store:", error);
       toast({
@@ -382,10 +413,10 @@ const StoreForm = ({ fetchAllStores }) => {
             <Select
               id="business-type-big"
               placeholder="대분류"
-              value={businessTypeBig ? businessTypeBig.description : ""}
+              value={businessTypeBig || ""} // key 값 사용
               onChange={(e) => {
-                const selectedCategory = Category[e.target.value]; // Category 객체 찾기
-                setBusinessTypeBig(selectedCategory);
+                const selectedKey = e.target.value;
+                setBusinessTypeBig(selectedKey); // `key` 값만 저장
                 setBusinessTypeMiddle(""); // 대분류 변경 시 중분류 초기화
               }}
             >
@@ -401,7 +432,7 @@ const StoreForm = ({ fetchAllStores }) => {
               id="business-type-middle"
               placeholder="중분류"
               value={businessTypeMiddle}
-              onChange={(e) => setBusinessTypeMiddle(e.target.value)}
+              onChange={(e) => setBusinessTypeMiddle(e.target.value)} // key 값만 설정
               isDisabled={!businessTypeBig} // 대분류 선택이 없을 시 비활성화
             >
               {middleOptions.map((subCategory) => (
@@ -639,13 +670,11 @@ const StoreForm = ({ fetchAllStores }) => {
                 value={snsType1}
                 onChange={(e) => setSnsType1(e.target.value)}
               >
-                <option value="INSTA">Instagram</option>
-                <option value="KAKAO">KakaoTalk</option>
-                <option value="YOUTUBE">YouTube</option>
-                <option value="TWITTER">Twitter</option>
-                <option value="BAND">Band</option>
-                <option value="NBLOG">Naver Blog</option>
-                <option value="ETC">Other</option>
+                {Object.keys(SnsType).map((key) => (
+                  <option key={key} value={key}>
+                    {SnsType[key]}
+                  </option>
+                ))}
               </Select>
               <Input
                 id="sns-url-1"
@@ -662,13 +691,11 @@ const StoreForm = ({ fetchAllStores }) => {
                 value={snsType2}
                 onChange={(e) => setSnsType2(e.target.value)}
               >
-                <option value="INSTA">Instagram</option>
-                <option value="KAKAO">KakaoTalk</option>
-                <option value="YOUTUBE">YouTube</option>
-                <option value="TWITTER">Twitter</option>
-                <option value="BAND">Band</option>
-                <option value="NBLOG">Naver Blog</option>
-                <option value="ETC">Other</option>
+                {Object.keys(SnsType).map((key) => (
+                  <option key={key} value={key}>
+                    {SnsType[key]}
+                  </option>
+                ))}
               </Select>
               <Input
                 id="sns-url-2"
@@ -754,16 +781,6 @@ const StoreForm = ({ fetchAllStores }) => {
           </FormControl>
 
           {/* 추가된 파라미터들 */}
-          <FormControl isRequired>
-            <FormLabel fontSize="18px">no</FormLabel>
-            <Input
-              type="number"
-              value={no}
-              onChange={(e) => setNo(e.target.value)}
-              placeholder="고유 번호를 입력하세요."
-            />
-          </FormControl>
-
           <FormControl>
             <FormLabel fontSize="18px">스티커 발송 여부</FormLabel>
             <Switch

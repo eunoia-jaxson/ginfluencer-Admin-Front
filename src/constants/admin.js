@@ -179,3 +179,13 @@ export const ProvideTarget2 = {
   FIREFIGHTER: "FIREFIGHTER",
   OTHER: "OTHER",
 };
+
+export const SnsType = {
+  INSTA: "INSTA",
+  KAKAO: "KAKAO",
+  YOUTUBE: "YOUTUBE",
+  TWITTER: "TWITTER",
+  BAND: "BAND",
+  NBLOG: "NBLOG",
+  ETC: "ETC",
+};
