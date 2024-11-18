@@ -26,6 +26,7 @@ import {
   ProvideTarget2,
   SnsType,
 } from "../../constants/admin";
+import { fetchAllStores } from "./index";
 
 const StoreForm = ({ fetchAllStores }) => {
   const [level, setLevel] = useState(MembershipLevel.ASSOCIATE_MEMBER);
@@ -146,21 +147,26 @@ const StoreForm = ({ fetchAllStores }) => {
   };
 
   useEffect(() => {
-    // 현재 저장된 마지막 `no`를 가져오는 함수 예시
-    const fetchLatestNo = async () => {
+    const fetchAllNos = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/latestNo`
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`
         );
-        const latestNo = response.data.latestNo; // 서버에서 마지막 `no` 값 반환
-        setNo(latestNo + 1); // 마지막 `no`에 +1하여 초기화
+        const allNos = response.data;
+        if (allNos && allNos.length > 0) {
+          const latestNo = Math.max(...allNos);
+          setNo(latestNo + 1);
+        } else {
+          setNo(1);
+        }
       } catch (error) {
-        console.error("Error fetching latest no:", error);
-        setNo(1); // 오류 시 기본값으로 1을 설정
+        console.error("Error fetching all nos:", error);
+        setNo(1);
       }
     };
-    fetchLatestNo();
+    fetchAllNos();
   }, []);
+
   const formatTimeToServer = (time) => {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
     return `${today}T${time}:00`; // YYYY-MM-DDTHH:mm:ss 형식으로 반환
@@ -168,7 +174,25 @@ const StoreForm = ({ fetchAllStores }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // if (!validateForm()) return;
+    const fetchLatestNo = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`
+        );
+        const allNos = response.data;
+        if (allNos && allNos.length > 0) {
+          const latestNo = Math.max(...allNos);
+          return latestNo + 1;
+        } else {
+          return 1;
+        }
+      } catch (error) {
+        console.error("Error fetching all nos:", error);
+        return 1;
+      }
+    };
 
+    const latestNo = await fetchLatestNo(); // 새로운 `no` 값 가져오기
     const storeData = {
       no,
       stickerSend,
@@ -181,7 +205,6 @@ const StoreForm = ({ fetchAllStores }) => {
       storeEmail,
       phoneNumber,
       password,
-      confirmPassword,
       storeTitle,
       businessTypeBig: businessTypeBig,
       businessTypeMiddle: businessTypeMiddle,
@@ -224,46 +247,14 @@ const StoreForm = ({ fetchAllStores }) => {
         }
       );
       console.log("Store created:", response.data);
-      fetchAllStores();
+      //fetchAllStores();
       toast({
         title: "Store added successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
-      // Reset form fields
-      // setLevel("ASSOCIATE_MEMBER");
-      // setBusinessNumber("");
-      // setCeoName("");
-      // setStoreEmail("");
-      // setPhoneNumber("");
-      // setPassword("");
-      // setConfirmPassword("");
-      // setStoreTitle("");
-      // setBusinessTypeBig("");
-      // setBusinessTypeMiddle("");
-      // setStorePhoneNumber("");
-      // setSeeAvailable(true);
-      // setStoreAddress("");
-      // setStoreDetailAddress("");
-      // setOpenTime("");
-      // setCloseTime("");
-      // setOpenBreakTime("");
-      // setCloseBreakTime("");
-      // setHoliDays([]);
-      // setDepositCheck(false);
-      // setProvideItems([]);
-      // setProvideTarget1("CHILD_ONLY");
-      // setProvideTarget2("");
-      // setSnsType1("");
-      // setSnsType1Url("");
-      // setSnsType2("");
-      // setSnsType2Url("");
-      // setStoreImgCI("");
-      // setStoreImgFront("");
-      // setStoreImgInside("");
-      // setStoreImgMenupan("");
-      // setStoreImgMenu("");
+
       setNo((prevNo) => prevNo + 1);
     } catch (error) {
       console.error("Error creating store:", error);
@@ -277,14 +268,6 @@ const StoreForm = ({ fetchAllStores }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (businessTypeBig) {
-  //     setMiddleOptions(categoryData[businessTypeBig].subCategories);
-  //     setBusinessTypeMiddle(""); // 선택 초기화
-  //   } else {
-  //     setMiddleOptions([]);
-  //   }
-  // }, [businessTypeBig]);
   return (
     <Box p={5} width="100%" mx="auto" height="70vh" overflow="auto">
       <form onSubmit={handleSubmit}>
@@ -780,7 +763,6 @@ const StoreForm = ({ fetchAllStores }) => {
             </VStack>
           </FormControl>
 
-          {/* 추가된 파라미터들 */}
           <FormControl>
             <FormLabel fontSize="18px">스티커 발송 여부</FormLabel>
             <Switch

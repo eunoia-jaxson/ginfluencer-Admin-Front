@@ -78,7 +78,6 @@ const StoreList = () => {
       console.error("Error fetching stores:", error);
     }
   };
-
   // 특정 가게 불러오기 API 함수
   const fetchStoreById = async (no) => {
     try {
@@ -90,7 +89,17 @@ const StoreList = () => {
       console.error("Error fetching store:", error);
     }
   };
-
+  const handleClick = async (itemNo) => {
+    try {
+      const storeData = await fetchStoreById(itemNo); // 데이터 불러오기
+      if (storeData) {
+        // 데이터를 정상적으로 불러온 후, navigate로 이동
+        navigate(`${form}?idx=${itemNo}`, { state: storeData });
+      }
+    } catch (error) {
+      console.error("Error during navigation:", error);
+    }
+  };
   // 가게 등록 API 함수
   const createStore = async (storeData) => {
     try {
@@ -393,7 +402,7 @@ const StoreList = () => {
             <Tbody>
               {stores.map((item, index) => (
                 <Tr
-                  key={item.idx}
+                  key={item.no}
                   borderBottomWidth="1px"
                   borderColor="gray.300"
                   _hover={{ bg: "gray.50" }}
@@ -408,7 +417,7 @@ const StoreList = () => {
                         fontSize="sm"
                         color="gray.700"
                         cursor="pointer"
-                        onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                        onClick={() => navigate(`${form}?idx=${item.no}`)}
                       >
                         {value}
                       </Td>
