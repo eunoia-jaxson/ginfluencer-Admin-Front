@@ -23,9 +23,8 @@ function App() {
         {location.pathname === "/" ? null : <NavBar />}
         <Routes>
           <Route path="/" element={<Admin />} />
-          <Route path="storeList" element={<StoreList />}>
-            <Route path="storeForm" element={<StoreForm />} />
-          </Route>
+          <Route path="storeList" element={<StoreList />} />
+          <Route path="/storeList/storeForm" element={<StoreForm />} />
           <Route path="noticeList" element={<NoticeList />}>
             <Route path="noticeForm" element={<NoticeForm />} />
           </Route>

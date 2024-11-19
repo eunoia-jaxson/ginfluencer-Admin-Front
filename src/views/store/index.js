@@ -37,11 +37,13 @@ import {
 import StoreForm from "./store_form";
 
 const StoreList = () => {
+  const [selectAll, setSelectAll] = useState(false);
+  const [checkedItems, setCheckedItems] = useState([]);
   const [stores, setStores] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [selectedStores, setSelectedStores] = useState([]);
+  const [selectedStore, setSelectedStore] = useState(null);
 
   const [selectedStoreType, setSelectedStoreType] = useState("");
   const [selectedMemberType, setSelectedMemberType] = useState("");
@@ -66,9 +68,16 @@ const StoreList = () => {
   const fetchAllStores = async () => {
     try {
       const response = await axiosInstance.get("/api/admin/stores/get/all");
-      console.log("response:", response.data);
+      console.log("response:", response.data); // 데이터 확인
       if (Array.isArray(response.data)) {
-        setStores(response.data);
+        setStores(
+          response.data.map((store) => ({
+            ...store,
+            stickerSend: store.stickerSend || false,
+            kitSend: store.kitSend || false,
+            seeAvailable: store.seeAvailable || false,
+          }))
+        );
         setTotalElements(response.data.length);
         setTotalPages(Math.ceil(response.data.length / PAGE_SIZE));
       } else {
@@ -78,28 +87,32 @@ const StoreList = () => {
       console.error("Error fetching stores:", error);
     }
   };
+
   // 특정 가게 불러오기 API 함수
   const fetchStoreById = async (no) => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/${no}`
-      );
+      const response = await axiosInstance.get(`/api/admin/stores/get/${no}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching store:", error);
     }
   };
-  const handleClick = async (itemNo) => {
+
+  const handleClick = async (no) => {
     try {
-      const storeData = await fetchStoreById(itemNo); // 데이터 불러오기
+      const storeData = await fetchStoreById(no);
       if (storeData) {
-        // 데이터를 정상적으로 불러온 후, navigate로 이동
-        navigate(`${form}?idx=${itemNo}`, { state: storeData });
+        setSelectedStore(storeData);
       }
     } catch (error) {
-      console.error("Error during navigation:", error);
+      console.error("Error fetching store::", error);
     }
   };
+
+  useEffect(() => {
+    fetchAllStores();
+  }, []);
+
   // 가게 등록 API 함수
   const createStore = async (storeData) => {
     try {
@@ -119,7 +132,15 @@ const StoreList = () => {
     try {
       await axios.put(
         `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "http://localhost:3000", // 로컬 개발 환경에 맞게 설정
+            "Access-Control-Allow-Credentials": "true",
+          },
+        }
       );
       fetchAllStores(); // 업데이트 후 목록을 갱신
     } catch (error) {
@@ -193,21 +214,25 @@ const StoreList = () => {
     console.log("검색어:", keyword);
   };
 
-  const handleSelectAll = (isChecked) => {
-    if (isChecked) {
-      const allIds = stores.map((store) => store.idx);
-      setSelectedStores(allIds);
+  // 모든 항목의 체크박스 상태를 변경
+  const handleSelectAllChange = (e) => {
+    setSelectAll(e.target.checked);
+    if (e.target.checked) {
+      setCheckedItems(stores.map((item) => item.no)); // 모든 항목 선택
     } else {
-      setSelectedStores([]);
+      setCheckedItems([]); // 모든 항목 해제
     }
   };
 
-  const handleCheckboxChange = (idx) => {
-    setSelectedStores((prevSelected) =>
-      prevSelected.includes(idx)
-        ? prevSelected.filter((id) => id !== idx)
-        : [...prevSelected, idx]
-    );
+  // 개별 체크박스를 변경
+  const handleCheckboxChange = (no) => {
+    setCheckedItems((prevState) => {
+      if (prevState.includes(no)) {
+        return prevState.filter((item) => item !== no); // 체크 해제
+      } else {
+        return [...prevState, no]; // 체크
+      }
+    });
   };
 
   const handleStoreTypeChange = (event) => {
@@ -343,9 +368,12 @@ const StoreList = () => {
         title="선한영향력가게 관리"
         form={form}
       />
-      {match ? (
+      {selectedStore ? (
         <Box id="store-form">
-          <StoreForm />
+          <StoreForm
+            storeData={selectedStore}
+            onCancel={() => setSelectedStore(null)}
+          />
         </Box>
       ) : (
         <Box>
@@ -382,6 +410,21 @@ const StoreList = () => {
           <Table variant="simple" bg="white" borderWidth="1px">
             <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
               <Tr>
+                <Th
+                  width="w-1/12"
+                  px={4}
+                  py={2.5}
+                  textAlign="center"
+                  fontSize="sm"
+                  fontWeight="semibold"
+                  whiteSpace="nowrap"
+                  color="gray.600"
+                >
+                  <Checkbox
+                    isChecked={selectAll}
+                    onChange={handleSelectAllChange}
+                  />
+                </Th>
                 {layout.map(({ name, value, width }) => (
                   <Th
                     key={name}
@@ -400,29 +443,84 @@ const StoreList = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {stores.map((item, index) => (
+              {stores.map((item, no) => (
                 <Tr
                   key={item.no}
                   borderBottomWidth="1px"
                   borderColor="gray.300"
                   _hover={{ bg: "gray.50" }}
                 >
-                  {layout.map(({ name }) => {
-                    const value = item[name];
-                    return (
-                      <Td
-                        key={name}
-                        textAlign="center"
-                        p={2}
-                        fontSize="sm"
-                        color="gray.700"
-                        cursor="pointer"
-                        onClick={() => navigate(`${form}?idx=${item.no}`)}
-                      >
-                        {value}
-                      </Td>
-                    );
-                  })}
+                  <Td textAlign="center" p={2} fontSize="sm" color="gray.700">
+                    <Checkbox
+                      isChecked={checkedItems.includes(item.no)}
+                      onChange={() => handleCheckboxChange(item.no)}
+                    />
+                  </Td>
+                  <Td
+                    textAlign="center"
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-1/12" // No 컬럼 너비
+                  >
+                    {item.no}
+                  </Td>
+                  <Td
+                    textAlign="center"
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-2/12" // 회원구분 컬럼 너비
+                  >
+                    {item.level}
+                  </Td>
+                  <Td
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-3/12" // 가게명 컬럼 너비
+                  >
+                    {item.storeTitle}
+                  </Td>
+                  <Td
+                    textAlign="center"
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-2/12" // 스티커발송 컬럼 너비
+                  >
+                    <Checkbox isChecked={item.stickerSend} isReadOnly />
+                  </Td>
+                  <Td
+                    textAlign="center"
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-2/12" // 키트발송 컬럼 너비
+                  >
+                    <Checkbox isChecked={item.kitSend} isReadOnly />
+                  </Td>
+                  <Td
+                    textAlign="center"
+                    p={2}
+                    fontSize="sm"
+                    color="gray.700"
+                    cursor="pointer"
+                    onClick={() => navigate(`${form}?idx=${item.no}`)}
+                    width="w-2/12" // 노출여부 컬럼 너비
+                  >
+                    <Checkbox isChecked={item.seeAvailable} isReadOnly />
+                  </Td>
                 </Tr>
               ))}
             </Tbody>

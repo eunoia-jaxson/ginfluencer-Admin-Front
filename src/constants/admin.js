@@ -7,15 +7,14 @@ export const ADMIN_NAVIGATE_LIST = [
 ];
 
 export const STORE_TABLE_LAYOUT = [
-  { name: "checkbox", value: "", width: "w-1/12" },
   { name: "no", value: "No.", width: "w-1/12" },
-  { name: "level", value: "회원구분", width: "w-1/12" },
-  { name: "storeTitle", value: "가게명", width: "w-4/12" },
-  { name: "reg_Dt", value: "신청일자", width: "w-1/12" },
-  { name: "creditYn", value: "입금확인", width: "w-1/12" },
-  { name: "stickerSend", value: "스티커발송", width: "w-1/12" },
-  { name: "kitSend", value: "키트발송", width: "w-1/12" },
-  { name: "seeAvailable", value: "노출여부", width: "w-1/12" },
+  { name: "level", value: "회원구분", width: "w-2/12" },
+  { name: "storeTitle", value: "가게명", width: "w-3/12" },
+  // { name: "reg_Dt", value: "신청일자", width: "w-2/12" },
+  // { name: "creditYn", value: "입금확인", width: "w-2/12" },
+  { name: "stickerSend", value: "스티커발송", width: "w-2/12" },
+  { name: "kitSend", value: "키트발송", width: "w-2/12" },
+  { name: "seeAvailable", value: "노출여부", width: "w-2/12" },
 ];
 
 export const NOTICE_TABLE_LAYOUT = [
