@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Input,
@@ -29,6 +30,64 @@ import {
 import { fetchAllStores } from "./index";
 
 const StoreForm = ({ fetchAllStores }) => {
+  const location = useLocation();
+  const storeData = location.state;
+  const [formData, setFormData] = useState({
+    level: MembershipLevel.ASSOCIATE_MEMBER,
+    businessNumber: "",
+    enrollDate: "",
+    ceoName: "",
+    storeEmail: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    storeTitle: "",
+    businessTypeBig: null,
+    businessTypeMiddle: "",
+    storePhoneNumber: "",
+    seeAvailable: true,
+    storeAddress: "",
+    storeDetailAddress: "",
+    openTime: "",
+    closeTime: "",
+    openBreakTime: "",
+    closeBreakTime: "",
+    holiDays: [],
+    depositCheck: false,
+    provideItems: [
+      {
+        name: "",
+        existingPrice: 0,
+        providePrice: 0,
+        freeProvide: false,
+      },
+    ],
+    provideTarget1: ProvideTarget1.CHILD_ONLY,
+    provideTarget2: [],
+    snsType1: "",
+    snsType1Url: "",
+    snsType2: "",
+    snsType2Url: "",
+    storeImgCI: "",
+    storeImgFront: "",
+    storeImgInside: "",
+    storeImgMenupan: "",
+    storeImgMenu: "",
+    no: 0,
+    stickerSend: false,
+    kitSend: false,
+    opened: false,
+  });
+
+  useEffect(() => {
+    if (storeData) {
+      setFormData((prevData) => ({
+        ...prevData,
+        ...storeData, // 전달된 storeData로 업데이트
+      }));
+    }
+  }, [storeData]);
+
   const [level, setLevel] = useState(MembershipLevel.ASSOCIATE_MEMBER);
   const [businessNumber, setBusinessNumber] = useState("");
   const [enrollDate, setEnrollDate] = useState("");
@@ -72,13 +131,15 @@ const StoreForm = ({ fetchAllStores }) => {
   const [storeImgMenupan, setStoreImgMenupan] = useState("");
   const [storeImgMenu, setStoreImgMenu] = useState("");
 
-  const [no, setNo] = useState(0);
+  const [no, setNo] = useState(null);
   const [stickerSend, setStickerSend] = useState(false);
   const [kitSend, setKitSend] = useState(false);
   const [opened, setOpened] = useState(false);
 
   const [errors, setErrors] = useState({});
   const toast = useToast();
+
+  const navigate = useNavigate();
 
   const middleOptions = businessTypeBig
     ? Object.keys(Category[businessTypeBig].subCategories).map((key) => ({
@@ -147,54 +208,100 @@ const StoreForm = ({ fetchAllStores }) => {
   };
 
   useEffect(() => {
-    const fetchAllNos = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`
-        );
-        const allNos = response.data;
-        if (allNos && allNos.length > 0) {
-          const latestNo = Math.max(...allNos);
-          setNo(latestNo + 1);
-        } else {
-          setNo(1);
-        }
-      } catch (error) {
-        console.error("Error fetching all nos:", error);
-        setNo(1);
-      }
-    };
-    fetchAllNos();
-  }, []);
-
-  const formatTimeToServer = (time) => {
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
-    return `${today}T${time}:00`; // YYYY-MM-DDTHH:mm:ss 형식으로 반환
-  };
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    // if (!validateForm()) return;
     const fetchLatestNo = async () => {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`
         );
         const allNos = response.data;
-        if (allNos && allNos.length > 0) {
-          const latestNo = Math.max(...allNos);
-          return latestNo + 1;
-        } else {
-          return 1;
-        }
+        const latestNo =
+          allNos && allNos.length > 0 ? Math.max(...allNos) + 1 : 1;
+        setNo(latestNo); // 상태로 저장
       } catch (error) {
         console.error("Error fetching all nos:", error);
-        return 1;
+        setNo(1); // 기본값
       }
     };
 
-    const latestNo = await fetchLatestNo(); // 새로운 `no` 값 가져오기
+    fetchLatestNo(); // 최초 실행 시 호출
+  }, []);
+
+  const formatTimeToServer = (time) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식의 오늘 날짜
+    return `${today}T${time}:00`; // YYYY-MM-DDTHH:mm:ss 형식으로 반환
+  };
+
+  useEffect(() => {
+    if (no) {
+      const fetchStoreData = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/${no}`
+          );
+          const storeData = response.data;
+
+          setBusinessNumber(storeData.businessNumber);
+          setEnrollDate(storeData.enrollDate.split("T")[0]);
+          setCeoName(storeData.ceoName);
+          setStoreEmail(storeData.storeEmail);
+          setPhoneNumber(storeData.phoneNumber);
+          setStoreTitle(storeData.storeTitle);
+          setBusinessTypeBig(storeData.businessTypeBig);
+          setBusinessTypeMiddle(storeData.businessTypeMiddle);
+          setStorePhoneNumber(storeData.storePhoneNumber);
+          setSeeAvailable(storeData.seeAvailable);
+          setStoreAddress(storeData.storeAddress);
+          setStoreDetailAddress(storeData.storeDetailAddress);
+          setOpenTime(storeData.openTime.split("T")[1].split(":")[0]);
+          setCloseTime(storeData.closeTime.split("T")[1].split(":")[0]);
+          setOpenBreakTime(storeData.openBreakTime.split("T")[1].split(":")[0]);
+          setCloseBreakTime(
+            storeData.closeBreakTime.split("T")[1].split(":")[0]
+          );
+          setHoliDays(storeData.holiDays);
+          setDepositCheck(storeData.depositCheck);
+          setProvideItems(storeData.provideItems || []);
+          setProvideTarget1(storeData.provideTarget1);
+          setProvideTarget2(storeData.provideTarget2);
+          setSnsType1(storeData.snsType1);
+          setSnsType1Url(storeData.snsType1Url);
+          setSnsType2(storeData.snsType2);
+          setSnsType2Url(storeData.snsType2Url);
+          setStoreImgCI(storeData.storeImgCI);
+          setStoreImgFront(storeData.storeImgFront);
+          setStoreImgInside(storeData.storeImgInside);
+          setStoreImgMenupan(storeData.storeImgMenupan);
+          setStoreImgMenu(storeData.storeImgMenu);
+        } catch (error) {
+          console.error("Failed to fetch store data", error);
+        }
+      };
+
+      fetchStoreData();
+    }
+  }, [no]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // 항상 최신 no 값을 계산
+    let currentNo = no;
+    if (!currentNo) {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`
+        );
+        const allNos = response.data;
+        currentNo = allNos && allNos.length > 0 ? Math.max(...allNos) + 1 : 1;
+        setNo(currentNo); // 상태 업데이트
+      } catch (error) {
+        console.error("Error fetching all nos in handleSubmit:", error);
+        currentNo = 1; // 기본값
+      }
+    }
+
     const storeData = {
-      no,
+      no: currentNo, // 최신값 사용
       stickerSend,
       kitSend,
       opened,
@@ -206,8 +313,8 @@ const StoreForm = ({ fetchAllStores }) => {
       phoneNumber,
       password,
       storeTitle,
-      businessTypeBig: businessTypeBig,
-      businessTypeMiddle: businessTypeMiddle,
+      businessTypeBig,
+      businessTypeMiddle,
       storePhoneNumber,
       seeAvailable,
       storeAddress,
@@ -233,29 +340,37 @@ const StoreForm = ({ fetchAllStores }) => {
     };
 
     try {
-      // await axiosInstance.post("/api/admin/stores/create", storeData);
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
-        storeData,
-        {
-          headers: {
-            "Content-Type": "application/json", // JSON 형식으로 데이터를 전송
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": `http://localhost:3000`,
-            "Access-Control-Allow-Credentials": "true",
-          },
-        }
-      );
-      console.log("Store created:", response.data);
-      //fetchAllStores();
-      toast({
-        title: "Store added successfully",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-
-      setNo((prevNo) => prevNo + 1);
+      if (no) {
+        const response = await axios.put(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
+          storeData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": `http://localhost:3000`,
+              "Access-Control-Allow-Credentials": "true",
+            },
+          }
+        );
+        console.log("Store updated:", response.data);
+        navigate("/storeList");
+      } else {
+        const response = await axios.post(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
+          storeData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": `http://localhost:3000`,
+              "Access-Control-Allow-Credentials": "true",
+            },
+          }
+        );
+        console.log("Store created:", response.data);
+        navigate("/storeList");
+      }
     } catch (error) {
       console.error("Error creating store:", error);
       toast({
@@ -269,7 +384,10 @@ const StoreForm = ({ fetchAllStores }) => {
   };
 
   return (
-    <Box p={5} width="100%" mx="auto" height="70vh" overflow="auto">
+    <Box p={5} width="100%" mx="auto" height="90vh" overflow="auto">
+      <Heading as="h1" size="lg">
+        {no ? "Edit Store" : "Create New Store"}
+      </Heading>
       <form onSubmit={handleSubmit}>
         <VStack spacing={6} align="stretch">
           <Heading size="lg">기본정보</Heading>
