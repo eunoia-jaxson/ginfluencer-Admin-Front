@@ -32,13 +32,13 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const queryParams = new URLSearchParams(location.search);
-  const idx = queryParams.get("idx");
+  const id = queryParams.get("id");
 
   useEffect(() => {
-    if (idx) {
-      fetchPopupData(idx);
+    if (id) {
+      fetchPopupData(id);
     }
-  }, [idx]);
+  }, [id]);
 
   const fetchPopupData = async (id) => {
     setIsLoading(true);
@@ -98,11 +98,11 @@ const Index = () => {
     }
 
     try {
-      const url = idx
-        ? `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${idx}`
+      const url = id
+        ? `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`
         : `${process.env.REACT_APP_BASE_URL}/api/admin/popups`;
 
-      const method = idx ? "patch" : "post";
+      const method = id ? "patch" : "post";
 
       const response = await axios({
         method,
@@ -112,7 +112,7 @@ const Index = () => {
       });
 
       if (response.status === 200) {
-        alert(`팝업이 ${idx ? "수정" : "생성"}되었습니다.`);
+        alert(`팝업이 ${id ? "수정" : "생성"}되었습니다.`);
         navigate("/post?type=popup");
       }
     } catch (error) {
