@@ -17,31 +17,32 @@ const PopupList = () => {
   const layout = POPUP_TABLE_LAYOUT;
   const form = "/post?type=popup/popupForm";
 
-  // Change popup to popupList
   const [popupList, setPopupList] = useState([]);
-  const [selectedPopup, setSelectedPopup] = useState({
-    id: null,
-    content: "",
-    title: "",
-    startDate: "",
-    endDate: "",
-    isVisible: true,
-  });
+  // const [selectedPopup, setSelectedPopup] = useState({
+  //   id: 0,
+  //   content: "",
+  //   title: "",
+  //   startDate: "",
+  //   endDate: "",
+  //   isVisible: true,
+  // });
+  const [selectedPopup, setSelectedPopup] = useState(null);
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const queryParams = new URLSearchParams(location.search);
-  const id = +queryParams.get("id");
+  const id = queryParams.get("id");
 
-  // Fetch popup list
-  const fetchPopupList = async () => {
+  const fetchPopups = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BASE_URL}/api/admin/popups`
       );
-      setPopupList(response.data);
+      if (response.status === 200) {
+        setPopupList(response.data);
+      }
     } catch (error) {
       console.error("Failed to fetch popups:", error);
     } finally {
@@ -49,8 +50,48 @@ const PopupList = () => {
     }
   };
 
+  const fetchPopupById = async (id) => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`
+      );
+      if (response.status === 200) {
+        setSelectedPopup(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch popup:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const url = selectedPopup.id
+        ? `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${selectedPopup.id}`
+        : `${process.env.REACT_APP_BASE_URL}/api/admin/popups`;
+      const method = selectedPopup.id ? "patch" : "post";
+
+      await axios[method](url, selectedPopup);
+      alert("팝업이 성공적으로 저장되었습니다.");
+      fetchPopups();
+      navigate("/post?type=popup"); // 리스트로 돌아가기
+    } catch (error) {
+      console.error("Error saving popup:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchPopupList();
+    if (id) {
+      fetchPopupById(id);
+    } else {
+      setSelectedPopup(null); // 새로운 폼을 위한 초기화
+    }
+  }, [id]);
+
+  // 전체 데이터 초기 로드
+  useEffect(() => {
+    fetchPopups();
   }, []);
 
   useEffect(() => {
@@ -143,7 +184,7 @@ const PopupList = () => {
           selectedPopup
         );
         alert("팝업이 성공적으로 등록되었습니다.");
-        fetchPopupList(); // Reload the popup list after submitting
+        fetchPopups(); // Reload the popup list after submitting
       } else {
         await axios.patch(
           `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`,
@@ -162,11 +203,19 @@ const PopupList = () => {
   return (
     <Box id="white-box" flex="1" bg="white" p={4}>
       <AdminTitle hasAddButton={!match} title="팝업 띄우기" form={form} />
-      <Box>
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
-          <>
+      {id ? (
+        <PopupForm
+          popupdata={selectedPopup}
+          onSave={() => {
+            fetchPopups();
+            navigate("/post?type=popup"); // 저장 후 목록으로 이동
+          }}
+        />
+      ) : (
+        <Box>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
             <Table variant="simple" bg="white" borderWidth="1px">
               <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
                 <Tr>
@@ -235,7 +284,7 @@ const PopupList = () => {
               <Tbody>
                 {popupList.map((item, index) => (
                   <Tr
-                    key={item.idx}
+                    key={item.id}
                     borderBottomWidth="1px"
                     borderColor="gray.300"
                     _hover={{ bg: "gray.50" }}
@@ -246,7 +295,7 @@ const PopupList = () => {
                       fontSize="sm"
                       color="gray.700"
                       cursor="pointer"
-                      onClick={() => navigate(`/popupForm?idx=${item.idx}`)}
+                      onClick={() => navigate(`${form}&id=${item.id}`)}
                     >
                       {item.title}
                     </Td>
@@ -256,7 +305,7 @@ const PopupList = () => {
                       fontSize="sm"
                       color="gray.700"
                       cursor="pointer"
-                      onClick={() => navigate(`/popupForm?idx=${item.idx}`)}
+                      onClick={() => navigate(`${form}&id=${item.id}`)}
                     >
                       {item.content || "내용 없음"}
                     </Td>
@@ -266,7 +315,7 @@ const PopupList = () => {
                       fontSize="sm"
                       color="gray.700"
                       cursor="pointer"
-                      onClick={() => navigate(`/popupForm?idx=${item.idx}`)}
+                      onClick={() => navigate(`${form}&id=${item.id}`)}
                     >
                       {item.isVisible ? "공개" : "비공개"}
                     </Td>
@@ -276,7 +325,7 @@ const PopupList = () => {
                       fontSize="sm"
                       color="gray.700"
                       cursor="pointer"
-                      onClick={() => navigate(`/popupForm?idx=${item.idx}`)}
+                      onClick={() => navigate(`${form}&id=${item.id}`)}
                     >
                       {item.startDate.split("T")[0]}
                     </Td>
@@ -286,7 +335,7 @@ const PopupList = () => {
                       fontSize="sm"
                       color="gray.700"
                       cursor="pointer"
-                      onClick={() => navigate(`/popupForm?idx=${item.idx}`)}
+                      onClick={() => navigate(`${form}&id=${item.id}`)}
                     >
                       {item.endDate.split("T")[0]}
                     </Td>
@@ -294,10 +343,10 @@ const PopupList = () => {
                 ))}
               </Tbody>
             </Table>
-            <PageButtonList />
-          </>
-        )}
-      </Box>
+          )}
+          <PageButtonList />
+        </Box>
+      )}
     </Box>
   );
 };

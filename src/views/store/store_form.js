@@ -28,6 +28,7 @@ import {
   SnsType,
 } from "../../constants/admin";
 import { fetchAllStores } from "./index";
+import Postcode from "./Postcode";
 
 const StoreForm = ({ fetchAllStores }) => {
   const location = useLocation();
@@ -340,7 +341,7 @@ const StoreForm = ({ fetchAllStores }) => {
     };
 
     try {
-      if (no) {
+      if (!no) {
         const response = await axios.put(
           `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
           storeData,
@@ -363,8 +364,6 @@ const StoreForm = ({ fetchAllStores }) => {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
-              "Access-Control-Allow-Origin": `http://localhost:3000`,
-              "Access-Control-Allow-Credentials": "true",
             },
           }
         );
@@ -567,13 +566,17 @@ const StoreForm = ({ fetchAllStores }) => {
           <FormControl isRequired>
             <FormLabel fontSize="18px">주소</FormLabel>
             <VStack>
-              <Input
-                id="postcode"
-                type="text"
-                value={storeAddress}
-                onChange={(e) => setStoreAddress(e.target.value)}
-                placeholder="우편번호"
-              />
+              <HStack>
+                <Input
+                  id="postcode"
+                  type="text"
+                  value={storeAddress}
+                  readOnly
+                  placeholder=""
+                  mt={4}
+                />
+                <Postcode setStoreAddress={setStoreAddress} />
+              </HStack>
               <Input
                 id="detail-address"
                 type="text"
