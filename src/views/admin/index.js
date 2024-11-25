@@ -46,7 +46,7 @@ const Admin = () => {
   };
 
   return (
-    <Flex justify="center" align="center" minH="100vh" minW="100vw" p={4}>
+    <Flex justify="center" align="center" minH="100vh" p={4}>
       <Box
         bg="gray.100"
         p={padding}
