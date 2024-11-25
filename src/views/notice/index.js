@@ -40,11 +40,12 @@ const NoticeList = () => {
   async function fetchData() {
     try {
       const result = await axios.get(
-        process.env.REACT_APP_API_URL + 'admin/announcements'
+        `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`
       );
 
       setNotices(result.data);
       setTotalElements(result.data.length);
+      console.log(result.data);
       // setNotices(result['data']);
       // setTotalPages(result['page']['totalPages']);
       // setTotalElements(result['page']['totalElements']);
@@ -68,7 +69,7 @@ const NoticeList = () => {
     try {
       const data = { ...notices[index], isOpened: enabled };
       await axios.patch(
-        `${process.env.REACT_APP_API_URL}admin/announcements/${id}`,
+        `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`,
         data,
         {
           headers: {

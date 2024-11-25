@@ -59,13 +59,17 @@ const Index = () => {
       if (id) {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}admin/announcements/${id}`
+            `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`
           );
-          const serverFiles = response.data.file.map((file) => ({
-            ...file,
-            state: 'stable',
-            type: 'server',
-          }));
+
+          if (response.data.announcementFiles !== null) {
+            const serverFiles = response.data.announcementFiles.map((file) => ({
+              ...file,
+              state: 'stable',
+              type: 'server',
+            }));
+            setFiles(serverFiles);
+          }
 
           setNotice({
             id: response.data.id,
@@ -73,9 +77,8 @@ const Index = () => {
             title: response.data.title,
             category: response.data.category,
             isOpened: response.data.isOpened,
-            file: response.data.file,
+            announcementFiles: response.data.announcementFiles,
           });
-          setFiles(serverFiles);
         } catch (error) {
           console.error('Failed to fetch notice:', error);
         }
@@ -106,14 +109,17 @@ const Index = () => {
 
     const validFiles = newFiles.filter((file) => file !== null);
     setFiles((prevFiles) => [...prevFiles, ...validFiles]);
-    setNotice({ ...notice, file: validFiles.map((file) => file.file) });
+    setNotice({
+      ...notice,
+      announcementFiles: validFiles.map((file) => file.file),
+    });
   };
 
   const handleDeleteFileChange = (index) => {
     const fileToDelete = files[index];
 
     if (fileToDelete.type === 'server') {
-      setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
+      setDeletedFiles((prev) => [...prev, fileToDelete.id]);
     }
 
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -130,8 +136,8 @@ const Index = () => {
     if (userConfirmed) {
       try {
         await axios.post(
-          `${process.env.REACT_APP_API_URL}admin/announcements`,
-          { ...notice, file: files },
+          `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`,
+          notice,
           {
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -152,8 +158,8 @@ const Index = () => {
       try {
         if (!id) return;
         await axios.patch(
-          `${process.env.REACT_APP_API_URL}admin/announcements/${id}`,
-          { ...notice, file: files },
+          `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`,
+          notice,
           {
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -173,7 +179,7 @@ const Index = () => {
     if (userConfirmed) {
       try {
         await axios.delete(
-          `${process.env.REACT_APP_API_URL}admin/announcements/${id}`
+          `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`
         );
         navigate('/noticeList');
         navigate(0);
@@ -278,7 +284,7 @@ const Index = () => {
         if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
-          // image.src = downloadUrl;
+          image.src = downloadUrl;
         }
       } catch (error) {
         console.error('Error processing image:', error);
@@ -289,6 +295,7 @@ const Index = () => {
 
     const updatedContents = doc.body.innerHTML;
     setNotice((prevNotice) => ({ ...prevNotice, content: updatedContents }));
+    console.log(notice);
     setIsContentUpdated(true);
   };
 
@@ -410,7 +417,6 @@ const NoticeForm = ({
       modules: modules,
     });
     setInitialLoad(false);
-    console.log(data);
   }, []);
 
   useEffect(() => {
