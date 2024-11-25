@@ -18,27 +18,27 @@ export const STORE_TABLE_LAYOUT = [
 ];
 
 export const NOTICE_TABLE_LAYOUT = [
-  { name: 'idx', value: 'No.', width: 'w-1/12' },
-  { name: 'type', value: '구분', width: 'w-1/12' },
+  { name: 'id', value: 'No.', width: 'w-1/12' },
+  { name: 'category', value: '구분', width: 'w-1/12' },
   { name: 'title', value: '제목', width: '' },
-  { name: 'regDt', value: '작성일', width: 'w-[10%]' },
-  { name: 'viewYn', value: '노출 여부', width: 'w-1/12' },
+  { name: 'createdDate', value: '작성일', width: 'w-[10%]' },
+  { name: 'isOpened', value: '노출 여부', width: 'w-1/12' },
 ];
 
 export const ASK_TABLE_LAYOUT = [
-  { name: 'idx', value: 'No.', width: 'w-1/12' },
-  { name: 'type', value: '분류', width: 'w-2/12' },
+  { name: 'id', value: 'No.', width: 'w-1/12' },
+  { name: 'category', value: '분류', width: 'w-2/12' },
   { name: 'title', value: '제목', width: '' },
-  { name: 'answerYn', value: '답변상태', width: 'w-1/12' },
-  { name: 'regDt', value: '작성일', width: 'w-[10%]' },
+  { name: 'answer', value: '답변상태', width: 'w-1/12' },
+  { name: 'createdDate', value: '작성일', width: 'w-[10%]' },
   // { name: 'secretYn', value: '답변하기', width: 'w-1/12' },
 ];
 
 export const FAQ_TABLE_LAYOUT = [
-  { name: 'idx', value: 'No.', width: 'w-1/12' },
+  { name: 'id', value: 'No.', width: 'w-1/12' },
   { name: 'title', value: '제목', width: '' },
-  { name: 'regDt', value: '작성일', width: 'w-[10%]' },
-  { name: 'viewYn', value: '노출 여부', width: 'w-1/12' },
+  { name: 'createdDate', value: '작성일', width: 'w-[10%]' },
+  { name: 'isOpened', value: '노출 여부', width: 'w-1/12' },
 ];
 
 export const POPUP_TABLE_LAYOUT = [
@@ -68,8 +68,8 @@ export const NOTICE_TYPE = [
 ];
 
 export const VIEW_TYPE = [
-  { id: 1, code: 'Y', value: '공개' },
-  { id: 2, code: 'N', value: '비공개' },
+  { id: 1, code: true, value: '공개' },
+  { id: 2, code: false, value: '비공개' },
 ];
 
 export const STORE_TYPE = [

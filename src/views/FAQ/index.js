@@ -1,21 +1,22 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from "@chakra-ui/react";
-import FAQForm from "./FAQ_form";
-import AdminTitle from "../../components/common/AdminTitle";
-import { useMatch, useNavigate } from "react-router-dom";
-import { FAQ_TABLE_LAYOUT, PAGE_SIZE } from "../../constants/admin";
-import { useState, useEffect } from "react";
-import PageButtonList from "../../components/common/PageButtonList";
+import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from '@chakra-ui/react';
+import FAQForm from './FAQ_form';
+import AdminTitle from '../../components/common/AdminTitle';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { FAQ_TABLE_LAYOUT, PAGE_SIZE } from '../../constants/admin';
+import { useState, useEffect } from 'react';
+import PageButtonList from '../../components/common/PageButtonList';
+import axios from 'axios';
 
 const FAQList = () => {
   const [faqs, setFaqs] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const match = useMatch("/FAQList/FAQForm");
+  const match = useMatch('/FAQList/FAQForm');
   const navigate = useNavigate();
   const layout = FAQ_TABLE_LAYOUT;
   const data = faqs;
-  const form = "faqForm";
+  const form = 'faqForm';
 
   const handlePaginationNumber = (e) => {
     setCurPages(e.target.innerText - 1);
@@ -25,7 +26,7 @@ const FAQList = () => {
     if (curPages > 0) {
       setCurPages(curPages - 1);
     } else {
-      alert("첫 페이지 입니다.");
+      alert('첫 페이지 입니다.');
     }
   };
 
@@ -33,47 +34,60 @@ const FAQList = () => {
     if (curPages < totalPages - 1) {
       setCurPages(curPages + 1);
     } else {
-      alert("마지막 페이지 입니다.");
+      alert('마지막 페이지 입니다.');
     }
   };
 
-  const handleToggle = async ({ index, id, enabled }) => {
+  const handleToggle = async (index, id, enabled) => {
     if (id === null || id === undefined) {
-      id = faqs[index].idx;
+      id = faqs[index].id;
     }
 
     try {
-      const data = { viewYn: enabled ? "N" : "Y" };
-      // const result = await NoticeAPI.updateNotice({ id, data });
+      const data = { ...faqs[index], isOpened: enabled };
+      await axios.patch(
+        `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      fetchData();
     } catch (error) {
-      console.log("에러", error);
+      console.log('에러', error);
     }
   };
 
-  // useEffect(() => {
-  //   async function fetchData(curPages, pageSize) {
-  //     try {
-  //       const result = await NoticeAPI.getNotices({
-  //         params: { curPages, pageSize },
-  //       });
+  async function fetchData() {
+    try {
+      const result = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`
+      );
 
-  //       setNotices(result["data"]);
-  //       setTotalPages(result["page"]["totalPages"]);
-  //       setTotalElements(result["page"]["totalElements"]);
+      setFaqs(result.data);
+      setTotalElements(result.data.length);
+      console.log(result.data);
+      // setNotices(result['data']);
+      // setTotalPages(result['page']['totalPages']);
+      // setTotalElements(result['page']['totalElements']);
 
-  //       if (result["data"].length > 0) {
-  //         setLatestIdx((prevState) => ({
-  //           ...prevState,
-  //           notice: result["data"][0].idx,
-  //         }));
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
+      // if (result['data'].length > 0) {
+      //   // setLatestIdx((prevState) => ({
+      //   //   ...prevState,
+      //   //   notice: result['data'][0].idx,
+      //   // }));
+      // }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-  //   fetchData(curPages, PAGE_SIZE);
-  // }, [curPages]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <Box id="white-box" flex="1" bg="white" p={4} h="full">
@@ -108,28 +122,28 @@ const FAQList = () => {
               {data &&
                 data.map((item, index) => (
                   <Tr
-                    key={item.idx}
+                    key={item.id}
                     borderBottomWidth="1px"
                     borderColor="gray.300"
-                    _hover={{ bg: "gray.50" }}
+                    _hover={{ bg: 'gray.50' }}
                   >
                     {layout.map(({ name }) => {
                       const value = item[name];
                       let tableValue = item[name];
 
-                      if (name === "viewYn") {
+                      if (name === 'isOpened') {
                         return (
                           <Td key={name} textAlign="center" py={1}>
                             <Switch
-                              id={item.idx}
+                              id={item.id}
                               onChange={() => handleToggle()}
-                              value={item.viewYn}
+                              value={item.isOpened}
                             />
                           </Td>
                         );
-                      } else if (name === "regDt") {
-                        tableValue = value.split(" ")[0];
-                      } else if (name === "idx") {
+                      } else if (name === 'createdDate') {
+                        tableValue = value;
+                      } else if (name === 'id') {
                         return (
                           <Td
                             key={name}
@@ -138,7 +152,7 @@ const FAQList = () => {
                             fontSize="sm"
                             color="gray.700"
                             cursor="pointer"
-                            onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                            onClick={() => navigate(`${form}?idx=${item.id}`)}
                           >
                             {totalElements - (curPages * 10 + index)}
                           </Td>
@@ -153,7 +167,7 @@ const FAQList = () => {
                           fontSize="sm"
                           color="gray.700"
                           cursor="pointer"
-                          onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                          onClick={() => navigate(`${form}?idx=${item.id}`)}
                         >
                           {tableValue}
                         </Td>

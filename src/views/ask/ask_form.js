@@ -15,11 +15,13 @@ import {
   Link,
   Spinner,
   useToast,
+  Checkbox,
 } from '@chakra-ui/react';
 import HoverButton from '../../components/common/HoverButton';
 // import { AskAPI } from '../../../../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { makeClearValue } from '../../utils/safe';
+import axios from 'axios';
 
 const Index = () => {
   const location = useLocation();
@@ -36,7 +38,7 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const idx = +queryParams.get('idx');
+  const id = +queryParams.get('idx');
 
   const mimeToExtension = {
     'image/jpeg': '.jpg',
@@ -49,27 +51,44 @@ const Index = () => {
     return mimeToExtension[mimeType] || '';
   };
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     setIsLoading(true);
-  //     if (idx) {
-  //       try {
-  //         const result = await AskAPI.getAsk({ id: idx });
-  //         const serverFiles = await result.askFile.map((file) => ({
-  //           ...file,
-  //           state: "stable",
-  //           type: "server",
-  //         }));
-  //         setAsk(result);
-  //         setFiles(serverFiles);
-  //       } catch (error) {
-  //         console.error("Failed to fetch ASK:", error);
-  //       }
-  //     }
-  //     setIsLoading(false);
-  //   }
-  //   fetchData();
-  // }, [location.search]);
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      if (id) {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
+          );
+
+          console.log(response.data);
+
+          if (response.data.image !== null) {
+            const serverFiles = response.data.image.map((file) => ({
+              ...file,
+              state: 'stable',
+              type: 'server',
+            }));
+            setFiles(serverFiles);
+          }
+
+          setAsk({
+            id: response.data.id,
+            content: response.data.content,
+            title: response.data.title,
+            category: response.data.category,
+            isSecret: response.data.isSecret,
+            image: response.data.image,
+            email: response.data.email,
+            emailChecked: response.data.emailChecked,
+          });
+        } catch (error) {
+          console.error('Failed to fetch notice:', error);
+        }
+      }
+      setIsLoading(false);
+    }
+    fetchData();
+  }, [location.search]);
 
   const handleFileChange = async (event) => {
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 10MB in bytes
@@ -287,7 +306,7 @@ const Index = () => {
         setIsLoading(true);
         try {
           let result;
-          if (!idx) {
+          if (!id) {
             result = await handleCreate();
           } else {
             result = await handleUpdate();
@@ -307,7 +326,7 @@ const Index = () => {
 
           setIsLoading(false);
           navigate(0);
-          if (!idx) {
+          if (!id) {
             navigate('/admin/askList');
           }
         } catch (error) {
@@ -363,11 +382,11 @@ const AskForm = ({
     answer,
     answerDt,
     answerYn,
-    contents,
-    notiEmail,
-    notiYn,
+    content,
+    email,
+    emailChecked,
     regDt,
-    secretYn,
+    isSecret,
     title,
     type,
     fileName,
@@ -453,9 +472,15 @@ const AskForm = ({
             <Th>문의구분</Th>
             <Td>{askType[type - 1]}</Td>
             <Th>수신 이메일</Th>
-            <Td>{notiEmail}</Td>
+            <Td>{email}</Td>
             <Th>이메일 수신여부</Th>
-            <Td>{notiYn}</Td>
+            <Td>
+              <Checkbox
+                isChecked={emailChecked}
+                isDisabled
+                colorScheme="blue"
+              />
+            </Td>
           </Tr>
           <Tr>
             <Th>제목</Th>
@@ -463,7 +488,9 @@ const AskForm = ({
               <Box p={2}>{title}</Box>
             </Td>
             <Th>비밀글 여부</Th>
-            <Td>{secretYn}</Td>
+            <Td>
+              <Checkbox isChecked={isSecret} isDisabled colorScheme="blue" />
+            </Td>
           </Tr>
           <Tr>
             <Th>첨부파일</Th>
@@ -483,7 +510,7 @@ const AskForm = ({
             <Th>내용</Th>
             <Td colSpan={5}>
               <Box p={2} whiteSpace="pre-wrap">
-                {contents}
+                {content}
               </Box>
             </Td>
           </Tr>
