@@ -1,21 +1,21 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from "@chakra-ui/react";
-import NoticeForm from "./notice_form";
-import AdminTitle from "../../components/common/AdminTitle";
-import { useMatch, useNavigate } from "react-router-dom";
-import { NOTICE_TABLE_LAYOUT, PAGE_SIZE } from "../../constants/admin";
-import { useState, useEffect } from "react";
-import PageButtonList from "../../components/common/PageButtonList";
+import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from '@chakra-ui/react';
+import NoticeForm from './notice_form';
+import AdminTitle from '../../components/common/AdminTitle';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { NOTICE_TABLE_LAYOUT, PAGE_SIZE } from '../../constants/admin';
+import { useState, useEffect } from 'react';
+import PageButtonList from '../../components/common/PageButtonList';
+import axios from 'axios';
 
 const NoticeList = () => {
   const [notices, setNotices] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const match = useMatch("/noticeList/noticeForm");
+  const match = useMatch('/noticeList/noticeForm');
   const navigate = useNavigate();
   const layout = NOTICE_TABLE_LAYOUT;
-  const data = notices;
-  const form = "noticeForm";
+  const form = 'noticeForm';
 
   const handlePaginationNumber = (e) => {
     setCurPages(e.target.innerText - 1);
@@ -25,7 +25,7 @@ const NoticeList = () => {
     if (curPages > 0) {
       setCurPages(curPages - 1);
     } else {
-      alert("첫 페이지 입니다.");
+      alert('첫 페이지 입니다.');
     }
   };
 
@@ -33,47 +33,59 @@ const NoticeList = () => {
     if (curPages < totalPages - 1) {
       setCurPages(curPages + 1);
     } else {
-      alert("마지막 페이지 입니다.");
+      alert('마지막 페이지 입니다.');
     }
   };
 
-  const handleToggle = async ({ index, id, enabled }) => {
+  async function fetchData() {
+    try {
+      const result = await axios.get(
+        process.env.REACT_APP_API_URL + 'admin/announcements'
+      );
+
+      setNotices(result.data);
+      setTotalElements(result.data.length);
+      // setNotices(result['data']);
+      // setTotalPages(result['page']['totalPages']);
+      // setTotalElements(result['page']['totalElements']);
+
+      // if (result['data'].length > 0) {
+      //   // setLatestIdx((prevState) => ({
+      //   //   ...prevState,
+      //   //   notice: result['data'][0].idx,
+      //   // }));
+      // }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleToggle = async (index, id, enabled) => {
     if (id === null || id === undefined) {
-      id = notices[index].idx;
+      id = notices[index].id;
     }
 
     try {
-      const data = { viewYn: enabled ? "N" : "Y" };
-      // const result = await NoticeAPI.updateNotice({ id, data });
+      const data = { ...notices[index], isOpened: enabled };
+      await axios.patch(
+        `${process.env.REACT_APP_API_URL}admin/announcements/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      fetchData();
     } catch (error) {
-      console.log("에러", error);
+      console.log('에러', error);
     }
   };
 
-  // useEffect(() => {
-  //   async function fetchData(curPages, pageSize) {
-  //     try {
-  //       const result = await NoticeAPI.getNotices({
-  //         params: { curPages, pageSize },
-  //       });
-
-  //       setNotices(result["data"]);
-  //       setTotalPages(result["page"]["totalPages"]);
-  //       setTotalElements(result["page"]["totalElements"]);
-
-  //       if (result["data"].length > 0) {
-  //         setLatestIdx((prevState) => ({
-  //           ...prevState,
-  //           notice: result["data"][0].idx,
-  //         }));
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-
-  //   fetchData(curPages, PAGE_SIZE);
-  // }, [curPages]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <Box id="white-box" flex="1" bg="white" p={4}>
@@ -105,37 +117,33 @@ const NoticeList = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((item, index) => (
+              {notices.map((item, index) => (
                 <Tr
-                  key={item.idx}
+                  key={item.id}
                   borderBottomWidth="1px"
                   borderColor="gray.300"
-                  _hover={{ bg: "gray.50" }}
+                  _hover={{ bg: 'gray.50' }}
                 >
                   {layout.map(({ name }) => {
                     const value = item[name];
                     let tableValue = item[name];
 
-                    if (name === "viewYn") {
+                    if (name === 'isOpened') {
                       return (
                         <Td key={name} textAlign="center" py={1}>
                           <Switch
-                            id={item.idx}
-                            value={item.viewYn}
-                            onChange={() => handleToggle()}
+                            isChecked={item.isOpened}
+                            onChange={() =>
+                              handleToggle(index, item.id, !item.isOpened)
+                            }
                           />
                         </Td>
                       );
-                    } else if (name === "type") {
-                      tableValue =
-                        value === "01"
-                          ? "공지"
-                          : value === "02"
-                          ? "뉴스"
-                          : "Undefined";
-                    } else if (name === "regDt") {
-                      tableValue = value.split(" ")[0];
-                    } else if (name === "idx") {
+                    } else if (name === 'category') {
+                      tableValue = value;
+                    } else if (name === 'createdDate') {
+                      tableValue = value.slice(0, 10);
+                    } else if (name === 'id') {
                       return (
                         <Td
                           key={name}
@@ -144,7 +152,7 @@ const NoticeList = () => {
                           fontSize="sm"
                           color="gray.700"
                           cursor="pointer"
-                          onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                          onClick={() => navigate(`${form}?idx=${item.id}`)}
                         >
                           {totalElements - (curPages * 10 + index)}
                         </Td>
@@ -159,7 +167,7 @@ const NoticeList = () => {
                         fontSize="sm"
                         color="gray.700"
                         cursor="pointer"
-                        onClick={() => navigate(`${form}?idx=${item.idx}`)}
+                        onClick={() => navigate(`${form}?idx=${item.id}`)}
                       >
                         {tableValue}
                       </Td>
