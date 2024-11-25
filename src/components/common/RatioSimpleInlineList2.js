@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { Box, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useState } from 'react';
+import { Box, Radio, RadioGroup, Stack, Text } from '@chakra-ui/react';
 
 const RatioSimpleInlineList = ({
   name,
-  defaultValue = "Y",
+  defaultValue = true,
   options,
   handleChange,
 }) => {
@@ -27,7 +27,7 @@ const RatioSimpleInlineList = ({
       onChange={handleInternalChange}
       value={options.find((item) => item.code === selectedValue)?.id.toString()}
     >
-      <Stack direction={{ base: "column", sm: "row" }} spacing={6}>
+      <Stack direction={{ base: 'column', sm: 'row' }} spacing={6}>
         {options.map((option) => (
           <Box key={option.id} display="flex" alignItems="center">
             <Radio

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Flex,
@@ -10,27 +10,26 @@ import {
   Tr,
   Th,
   Td,
-  Text,
-} from "@chakra-ui/react";
-import { Quill } from "react-quill";
-import ImageResize from "quill-image-resize";
-import "react-quill/dist/quill.snow.css";
-import { useNavigate, useLocation } from "react-router-dom";
+} from '@chakra-ui/react';
+import { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize';
+import 'react-quill/dist/quill.snow.css';
+import { useNavigate, useLocation } from 'react-router-dom';
 // import { NoticeAPI } from "../../../../api";
-import RatioSimpleInlineList2 from "../../components/common/RatioSimpleInlineList2";
-import SelectSimpleCustom2 from "../../components/common/SelectSimpleCustom2";
-import { NOTICE_TYPE, VIEW_TYPE } from "../../constants/admin";
-import { makeClearValue } from "../../utils/safe";
-import HoverButton from "../../components/common/HoverButton";
+import RatioSimpleInlineList2 from '../../components/common/RatioSimpleInlineList2';
+import SelectSimpleCustom2 from '../../components/common/SelectSimpleCustom2';
+import { NOTICE_TYPE, VIEW_TYPE } from '../../constants/admin';
+import { makeClearValue } from '../../utils/safe';
+import axios from 'axios';
 
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [notice, setNotice] = useState({
-    title: "",
-    type: "",
-    viewYn: "Y",
+    title: '',
+    category: '',
+    isOpened: true,
   });
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
@@ -41,47 +40,50 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const idx = +queryParams.get("idx");
+  const id = +queryParams.get('idx');
 
   const mimeToExtension = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "application/pdf": ".pdf",
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'application/pdf': '.pdf',
   };
 
   const getExtensionFromMime = (mimeType) => {
-    return mimeToExtension[mimeType] || "";
+    return mimeToExtension[mimeType] || '';
   };
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     setIsLoading(true);
-  //     if (idx) {
-  //       try {
-  //         const result = await NoticeAPI.getNotice({ id: idx });
-  //         const serverFiles = result.noticeFile.map((file) => ({
-  //           ...file,
-  //           state: "stable",
-  //           type: "server",
-  //         }));
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      if (id) {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}admin/announcements/${id}`
+          );
+          const serverFiles = response.data.file.map((file) => ({
+            ...file,
+            state: 'stable',
+            type: 'server',
+          }));
 
-  //         setNotice({
-  //           idx: result.idx,
-  //           contents: result.contents,
-  //           title: result.title,
-  //           type: result.type,
-  //           viewYn: result.viewYn ? result.viewYn : "Y",
-  //         });
-  //         setFiles(serverFiles);
-  //       } catch (error) {
-  //         console.error("Failed to fetch notice:", error);
-  //       }
-  //     }
-  //     setIsLoading(false);
-  //   }
-  //   fetchData();
-  // }, [location.search]);
+          setNotice({
+            id: response.data.id,
+            content: response.data.content,
+            title: response.data.title,
+            category: response.data.category,
+            isOpened: response.data.isOpened,
+            file: response.data.file,
+          });
+          setFiles(serverFiles);
+        } catch (error) {
+          console.error('Failed to fetch notice:', error);
+        }
+      }
+      setIsLoading(false);
+    }
+    fetchData();
+  }, [id]);
 
   const handleFileChange = async (event) => {
     const MAX_FILE_SIZE = 30 * 1024 * 1024;
@@ -96,20 +98,21 @@ const Index = () => {
         id: null,
         oriName: file.name,
         realName: file.name,
-        state: "new",
-        type: "local",
+        state: 'new',
+        type: 'local',
         file,
       };
     });
 
     const validFiles = newFiles.filter((file) => file !== null);
     setFiles((prevFiles) => [...prevFiles, ...validFiles]);
+    setNotice({ ...notice, file: validFiles.map((file) => file.file) });
   };
 
   const handleDeleteFileChange = (index) => {
     const fileToDelete = files[index];
 
-    if (fileToDelete.type === "server") {
+    if (fileToDelete.type === 'server') {
       setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
     }
 
@@ -123,54 +126,73 @@ const Index = () => {
   };
 
   const handleCreate = async () => {
-    const userConfirmed = window.confirm("공지사항을 등록하시겠나요?");
-    // if (userConfirmed) {
-    //   try {
-    //     const { noticeIdx } = await NoticeAPI.createNotice({ data: notice });
-    //     return noticeIdx;
-    //   } catch (error) {
-    //     console.log("등록 에러", error);
-    //     return "error";
-    //   }
-    // }
+    const userConfirmed = window.confirm('공지사항을 등록하시겠나요?');
+    if (userConfirmed) {
+      try {
+        await axios.post(
+          `${process.env.REACT_APP_API_URL}admin/announcements`,
+          { ...notice, file: files },
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        navigate('/NoticeList');
+      } catch (error) {
+        console.log('등록 에러', error);
+        return 'error';
+      }
+    }
   };
 
   const handleUpdate = async () => {
-    const userConfirmed = window.confirm("공지사항을 수정하시겠나요?");
-    // if (userConfirmed) {
-    //   try {
-    //     if (!idx) return;
-    //     const result = await NoticeAPI.updateNotice({ id: idx, data: notice });
-    //     return "success";
-    //   } catch (error) {
-    //     return "error";
-    //   }
-    // }
+    const userConfirmed = window.confirm('공지사항을 수정하시겠나요?');
+    if (userConfirmed) {
+      try {
+        if (!id) return;
+        await axios.patch(
+          `${process.env.REACT_APP_API_URL}admin/announcements/${id}`,
+          { ...notice, file: files },
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        navigate('/NoticeList');
+      } catch (error) {
+        console.log('등록 에러', error);
+        return 'error';
+      }
+    }
   };
 
   const handleDelete = async () => {
-    const userConfirmed = window.confirm("공지사항을 삭제하시겠나요?");
-    // if (userConfirmed) {
-    //   try {
-    //     await NoticeAPI.deleteNotice({ id: idx });
-    //     navigate("/admin/noticeList");
-    //     navigate(0);
-    //   } catch (error) {
-    //     alert("오류가 발생했습니다.");
-    //   }
-    // }
+    const userConfirmed = window.confirm('공지사항을 삭제하시겠나요?');
+    if (userConfirmed) {
+      try {
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL}admin/announcements/${id}`
+        );
+        navigate('/noticeList');
+        navigate(0);
+      } catch (error) {
+        alert('오류가 발생했습니다.');
+      }
+    }
   };
 
   const handleCancle = () => {
     const userConfirmed = window.confirm(
-      "작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다."
+      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
     );
 
     if (userConfirmed) {
       try {
-        navigate("/NoticeList");
+        navigate('/NoticeList');
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
@@ -191,13 +213,13 @@ const Index = () => {
     let latestIdx = result;
 
     files.forEach((file) => {
-      if (file.state === "new" && file.type === "local") {
-        formData.append("files", file.file);
+      if (file.state === 'new' && file.type === 'local') {
+        formData.append('files', file.file);
         hasAddedFile = true;
       }
     });
 
-    if (!hasAddedFile) return "success";
+    if (!hasAddedFile) return 'success';
 
     // try {
     //   await NoticeAPI.addFileNotice({
@@ -212,7 +234,7 @@ const Index = () => {
   };
 
   const base64ToBlob = (base64) => {
-    const byteString = atob(base64.split(",")[1]);
+    const byteString = atob(base64.split(',')[1]);
     const mimeType = base64.match(/data:(.*?);base64/)[1];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
@@ -228,7 +250,7 @@ const Index = () => {
     const extension = getExtensionFromMime(file.type);
     const fileName = `editor_embeded${extension}`;
 
-    formData.append("file", file, fileName);
+    formData.append('file', file, fileName);
 
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -243,30 +265,30 @@ const Index = () => {
     // }
   };
 
-  const changeContents = async () => {
-    let contents = quillInstance.current.root.innerHTML;
+  const changeContent = async () => {
+    let content = quillInstance.current.root.innerHTML;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(contents, "text/html");
-    const images = doc.querySelectorAll("img");
+    const doc = parser.parseFromString(content, 'text/html');
+    const images = doc.querySelectorAll('img');
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
       try {
         const base64url = image.src;
 
-        if (base64url.startsWith("data:image")) {
+        if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
           // image.src = downloadUrl;
         }
       } catch (error) {
-        console.error("Error processing image:", error);
+        console.error('Error processing image:', error);
       }
     });
 
     await Promise.all(uploadImageAndChangeURL);
 
     const updatedContents = doc.body.innerHTML;
-    setNotice((prevNotice) => ({ ...prevNotice, contents: updatedContents }));
+    setNotice((prevNotice) => ({ ...prevNotice, content: updatedContents }));
     setIsContentUpdated(true);
   };
 
@@ -276,24 +298,24 @@ const Index = () => {
         setIsLoading(true);
         try {
           let result;
-          if (!idx) {
+          if (!id) {
             result = await handleCreate();
           } else {
             result = await handleUpdate();
           }
 
-          // if (result === "error") {
-          //   setIsLoading(false);
-          //   alert("오류가 발생했습니다.");
-          //   return;
-          // }
+          if (result === 'error') {
+            setIsLoading(false);
+            alert('오류가 발생했습니다.');
+            return;
+          }
 
           await handleAddFile(result);
 
           setIsLoading(false);
           navigate(0);
-          if (!idx) {
-            navigate("/admin/noticeList");
+          if (!id) {
+            navigate('/admin/noticeList');
           }
         } catch (error) {
           console.log(error);
@@ -307,32 +329,34 @@ const Index = () => {
   const handleSubmit = async () => {
     if (
       !notice.title ||
-      !notice.type ||
-      !notice.viewYn ||
+      !notice.category ||
+      !notice.isOpened ||
       !quillInstance.current.root.innerHTML
     ) {
-      alert("모든 필수 항목을 입력해주세요.");
+      alert('모든 필수 항목을 입력해주세요.');
       return;
     }
 
-    await changeContents();
+    await changeContent();
   };
 
   return (
     <Box>
       {isLoading && <Spinner />}
-      <NoticeForm
-        data={notice}
-        files={files}
-        quillElement={quillElement}
-        quillInstance={quillInstance}
-        onChange={handleChange}
-        onFileChange={handleFileChange}
-        onDeleteFileChange={handleDeleteFileChange}
-        onDelete={handleDelete}
-        onSubmit={handleSubmit}
-        onCancle={handleCancle}
-      />
+      {!isLoading && (
+        <NoticeForm
+          data={notice}
+          files={files}
+          quillElement={quillElement}
+          quillInstance={quillInstance}
+          onChange={handleChange}
+          onFileChange={handleFileChange}
+          onDeleteFileChange={handleDeleteFileChange}
+          onDelete={handleDelete}
+          onSubmit={handleSubmit}
+          onCancle={handleCancle}
+        />
+      )}
     </Box>
   );
 };
@@ -349,47 +373,48 @@ const NoticeForm = ({
   onSubmit,
   onCancle,
 }) => {
-  const { title, contents, type, viewYn } = data;
+  const { title, content, category, isOpened } = data;
 
   const modules = {
     toolbar: [
       [{ font: [] }],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
       ],
-      ["image"],
+      ['image'],
       [{ align: [] }, { color: [] }, { background: [] }],
-      ["clean"],
+      ['clean'],
     ],
     ImageResize: {
       parchment: {
         image: {
-          attributes: ["width", "height", "align"],
+          attributes: ['width', 'height', 'align'],
         },
       },
     },
   };
 
-  Quill.register("modules/ImageResize", ImageResize);
+  Quill.register('modules/ImageResize', ImageResize);
 
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     quillInstance.current = new Quill(quillElement.current, {
-      theme: "snow",
-      placeholder: "내용을 작성해주세요.",
+      theme: 'snow',
+      placeholder: '내용을 작성해주세요.',
       modules: modules,
     });
     setInitialLoad(false);
+    console.log(data);
   }, []);
 
   useEffect(() => {
-    if (!initialLoad && quillInstance.current && contents) {
+    if (!initialLoad && quillInstance.current && content) {
       const quill = quillInstance.current;
       const range = quill.getSelection();
 
@@ -397,17 +422,17 @@ const NoticeForm = ({
         quill.setSelection(range);
       }
     }
-  }, [contents, initialLoad]);
+  }, [content, initialLoad]);
 
   useEffect(() => {
     try {
-      if (contents) {
+      if (content) {
         const quill = quillInstance.current;
-        const delta = quill.clipboard.convert(contents);
-        quill.setContents(delta, "silent");
+        const delta = quill.clipboard.convert(content);
+        quill.setContents(delta, 'silent');
       }
     } catch (error) {
-      console.log("quill 초기화", error);
+      console.log('quill 초기화', error);
     }
   }, []);
 
@@ -428,22 +453,22 @@ const NoticeForm = ({
         <Tbody>
           <Tr>
             <Th>
-              구분<span style={{ color: "red" }}> *</span>
+              구분<span style={{ color: 'red' }}> *</span>
             </Th>
             <Td>
               <SelectSimpleCustom2
-                defaultValue={type}
+                defaultValue={category}
                 options={NOTICE_TYPE}
                 handleChange={onChange}
               />
             </Td>
             <Th>
-              게재 여부<span style={{ color: "red" }}> *</span>
+              게재 여부<span style={{ color: 'red' }}> *</span>
             </Th>
             <Td>
               <RatioSimpleInlineList2
-                name={"viewYn"}
-                defaultValue={viewYn}
+                name={'isOpened'}
+                defaultValue={isOpened}
                 options={VIEW_TYPE}
                 handleChange={onChange}
               />
@@ -451,21 +476,21 @@ const NoticeForm = ({
           </Tr>
           <Tr>
             <Th>
-              제목<span style={{ color: "red" }}> *</span>
+              제목<span style={{ color: 'red' }}> *</span>
             </Th>
             <Td colSpan={4}>
-              <ChakraInput value={title} onChange={onChange} placeholder={""} />
+              <ChakraInput value={title} onChange={onChange} placeholder={''} />
             </Td>
           </Tr>
           <Tr>
             <Th>
-              내용<span style={{ color: "red" }}> *</span>
+              내용<span style={{ color: 'red' }}> *</span>
             </Th>
             <Td colSpan={4}>
               <div
                 id="quill-element"
                 ref={quillElement}
-                style={{ height: "300px" }}
+                style={{ height: '300px' }}
               />
             </Td>
           </Tr>
@@ -484,15 +509,16 @@ const NoticeForm = ({
                   cursor="pointer"
                   onChange={onFileChange}
                   multiple
+                  zIndex={1}
                 />
-                <HoverButton
-                  title={"파일첨부"}
-                  w={"24"}
-                  h={"8 md:h-10"}
-                  textSize={"xs md:text-sm"}
-                  data={null}
-                  onPass={null}
-                />
+                <Button
+                  w={'24'}
+                  h={'8 md:h-10'}
+                  fontSize={'xs md:text-sm'}
+                  zIndex={0}
+                >
+                  파일첨부
+                </Button>
               </Box>
               <Box mt={2}>
                 {files.map((file, index) => (
@@ -501,9 +527,10 @@ const NoticeForm = ({
                     alignItems="center"
                     fontSize="sm"
                     color="gray.700"
+                    mb={files.length - 1 !== index ? 2 : null}
                   >
                     <a
-                      href={"file/notice/" + file.realName}
+                      href={'file/notice/' + file.realName}
                       download={file.oriName || file.name}
                       className="hover:underline"
                     >
@@ -511,7 +538,7 @@ const NoticeForm = ({
                     </a>
                     <Button
                       onClick={() => onDeleteFileChange(index)}
-                      pl={2}
+                      ml={2}
                       color="red.500"
                     >
                       삭제
@@ -576,7 +603,7 @@ const ChakraInput = ({ value, placeholder, onChange }) => {
       shadow="sm"
       ring={1}
       ringColor="gray.300"
-      _placeholder={{ color: "gray.400" }}
+      _placeholder={{ color: 'gray.400' }}
       focusBorderColor="indigo.600"
       fontSize="sm"
       placeholder={placeholder}

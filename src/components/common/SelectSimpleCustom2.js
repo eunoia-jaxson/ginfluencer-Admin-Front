@@ -16,12 +16,12 @@ export default function SelectSimpleCustom({
   options,
   handleChange,
 }) {
-  const defaultOption = options.find((option) => option.code === defaultValue);
+  const defaultOption = options.find((option) => option.value === defaultValue);
   const [selected, setSelected] = useState(defaultOption || options[0]);
 
   useEffect(() => {
     const newDefaultOption = options.find(
-      (option) => option.code === defaultValue
+      (option) => option.value === defaultValue
     );
     if (newDefaultOption) {
       setSelected(newDefaultOption);
@@ -30,7 +30,7 @@ export default function SelectSimpleCustom({
 
   const handleSelectChange = (value) => {
     setSelected(value);
-    handleChange({ target: { name: 'type', value: value.code } });
+    handleChange({ target: { name: 'category', value: value.value } });
   };
 
   return (
@@ -59,11 +59,11 @@ export default function SelectSimpleCustom({
           >
             <Flex justify="space-between" align="center" w="full">
               <Text
-                fontWeight={selected.code === option.code ? 'bold' : 'normal'}
+                fontWeight={selected.value === option.value ? 'bold' : 'normal'}
               >
                 {option.value}
               </Text>
-              {selected.code === option.code && (
+              {selected.value === option.value && (
                 <Icon as={CheckIcon} color="blue.500" />
               )}
             </Flex>
