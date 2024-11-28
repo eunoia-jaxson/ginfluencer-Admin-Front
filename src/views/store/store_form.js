@@ -382,9 +382,6 @@ const StoreForm = ({ fetchAllStores }) => {
 
   return (
     <Box p={5} width="100%" mx="auto" height="90vh" overflow="auto">
-      <Heading as="h1" size="lg">
-        {no ? "Edit Store" : "Create New Store"}
-      </Heading>
       <form onSubmit={handleSubmit}>
         <VStack spacing={6} align="stretch">
           <Heading size="lg">기본정보</Heading>
@@ -399,7 +396,7 @@ const StoreForm = ({ fetchAllStores }) => {
             </RadioGroup>
             <Text fontSize="sm" color="gray.500" mt={2}>
               ※ 정회원은 협회 활동에 대한 참여 및 의결권을 가지고 협회사 대상
-              지원 사업 우선권이 있으며, 매년 연회비(120,000원/매월1만원
+              지원 사업 우선권이 있으며, 매년 연회비(120,000원/매월 1만원
               정기납부 결제가능) 납입의무가 있습니다.
               <br />※ 준회원은 협회 활동에 대한 의결권 및 연회비 납입의무가
               없습니다.
