@@ -130,7 +130,7 @@ const AskList = () => {
                       return (
                         <Td key={name} textAlign="center" py={1}>
                           <Checkbox
-                            isChecked={value === 'Y'}
+                            isChecked={value !== null}
                             isDisabled
                             colorScheme="blue"
                           />

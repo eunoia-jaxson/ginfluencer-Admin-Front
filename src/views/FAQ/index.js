@@ -135,9 +135,10 @@ const FAQList = () => {
                         return (
                           <Td key={name} textAlign="center" py={1}>
                             <Switch
-                              id={item.id}
-                              onChange={() => handleToggle()}
-                              value={item.isOpened}
+                              isChecked={item.isOpened}
+                              onChange={() =>
+                                handleToggle(index, item.id, !item.isOpened)
+                              }
                             />
                           </Td>
                         );

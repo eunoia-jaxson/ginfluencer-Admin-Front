@@ -21,7 +21,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import RatioSimpleInlineList2 from '../../components/common/RatioSimpleInlineList2';
 import { VIEW_TYPE } from '../../constants/admin';
 import { makeClearValue } from '../../utils/safe';
-import HoverButton from '../../components/common/HoverButton';
 import axios from 'axios';
 
 const Index = () => {
@@ -30,7 +29,6 @@ const Index = () => {
 
   const [faq, setFaq] = useState({
     title: '',
-    type: '',
     isOpened: 'Y',
   });
   const [files, setFiles] = useState([]);
@@ -61,8 +59,10 @@ const Index = () => {
       if (id) {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`
+            `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
           );
+
+          console.log(response.data);
 
           if (response.data.faqFiles !== null) {
             const serverFiles = response.data.faqFiles.map((file) => ({
@@ -77,9 +77,8 @@ const Index = () => {
             id: response.data.id,
             content: response.data.content,
             title: response.data.title,
-            category: response.data.category,
             isOpened: response.data.isOpened,
-            faqFiles: response.data.announcementFiles,
+            faqFiles: response.data.faqFiles,
           });
         } catch (error) {
           console.error('Failed to fetch notice:', error);
@@ -111,13 +110,17 @@ const Index = () => {
 
     const validFiles = newFiles.filter((file) => file !== null);
     setFiles((prevFiles) => [...prevFiles, ...validFiles]);
+    setFaq({
+      ...faq,
+      faqFiles: validFiles.map((file) => file.file),
+    });
   };
 
   const handleDeleteFileChange = (index) => {
     const fileToDelete = files[index];
 
     if (fileToDelete.type === 'server') {
-      setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
+      setDeletedFiles((prev) => [...prev, fileToDelete.id]);
     }
 
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -131,7 +134,6 @@ const Index = () => {
 
   const handleCreate = async () => {
     const userConfirmed = window.confirm('FAQ를 등록하시겠나요?');
-
     if (userConfirmed) {
       try {
         await axios.post(
@@ -145,7 +147,7 @@ const Index = () => {
         );
         navigate('/FAQList');
       } catch (error) {
-        console.log('등록에러', error);
+        console.log('등록 에러', error);
         return 'error';
       }
     }
@@ -153,17 +155,24 @@ const Index = () => {
 
   const handleUpdate = async () => {
     const userConfirmed = window.confirm('FAQ를 수정하시겠나요?');
-
-    // if (userConfirmed) {
-    //   try {
-    //     if (!idx) return;
-    //     const result = await FaqAPI.updateFaq({ id: idx, data: faq });
-    //     console.log('수정완료', result);
-    //     return 'success';
-    //   } catch (error) {
-    //     return 'error';
-    //   }
-    // }
+    if (userConfirmed) {
+      try {
+        if (!id) return;
+        await axios.patch(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
+          faq,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        navigate('/FAQList');
+      } catch (error) {
+        console.log('수정 에러', error);
+        return 'error';
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -267,10 +276,10 @@ const Index = () => {
     // }
   };
 
-  const changeContents = async () => {
-    let contents = quillInstance.current.root.innerHTML;
+  const changeContent = async () => {
+    let content = quillInstance.current.root.innerHTML;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(contents, 'text/html');
+    const doc = parser.parseFromString(content, 'text/html');
     const images = doc.querySelectorAll('img');
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
@@ -280,7 +289,7 @@ const Index = () => {
         if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
-          // image.src = downloadUrl;
+          image.src = downloadUrl;
         }
       } catch (error) {
         console.error('Error processing image:', error);
@@ -290,7 +299,7 @@ const Index = () => {
     await Promise.all(uploadImageAndChangeURL);
 
     const updatedContents = doc.body.innerHTML;
-    setFaq((prevFaq) => ({ ...prevFaq, contents: updatedContents }));
+    setFaq((prevFaq) => ({ ...prevFaq, content: updatedContents }));
     setIsContentUpdated(true);
   };
 
@@ -306,11 +315,11 @@ const Index = () => {
             result = await handleUpdate();
           }
 
-          // if (result === "error") {
-          //   setIsLoading(false);
-          //   alert("오류가 발생했습니다.");
-          //   return;
-          // }
+          if (result === 'error') {
+            setIsLoading(false);
+            alert('오류가 발생했습니다.');
+            return;
+          }
 
           await handleAddFile(result);
 
@@ -334,24 +343,26 @@ const Index = () => {
       return;
     }
 
-    await changeContents();
+    await changeContent();
   };
 
   return (
     <Box>
       {isLoading && <Spinner />}
-      <FAQForm
-        data={faq}
-        files={files}
-        quillElement={quillElement}
-        quillInstance={quillInstance}
-        onChange={handleChange}
-        onFileChange={handleFileChange}
-        onDeleteFileChange={handleDeleteFileChange}
-        onDelete={handleDelete}
-        onSubmit={handleSubmit}
-        onCancle={handleCancle}
-      />
+      {!isLoading && (
+        <FAQForm
+          data={faq}
+          files={files}
+          quillElement={quillElement}
+          quillInstance={quillInstance}
+          onChange={handleChange}
+          onFileChange={handleFileChange}
+          onDeleteFileChange={handleDeleteFileChange}
+          onDelete={handleDelete}
+          onSubmit={handleSubmit}
+          onCancle={handleCancle}
+        />
+      )}
     </Box>
   );
 };
@@ -368,7 +379,15 @@ const FAQForm = ({
   onSubmit,
   onCancle,
 }) => {
-  const { title, content, createdDate, isOpened } = data;
+  const { title, content, isOpened } = data;
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const today = `${year}-${month >= 10 ? month : '0' + month}-${
+    day >= 10 ? day : '0' + day
+  }`;
 
   const modules = {
     toolbar: [
@@ -442,7 +461,7 @@ const FAQForm = ({
         <Tbody>
           <Tr>
             <Th>등록일</Th>
-            <Td>{createdDate}</Td>
+            <Td>{today}</Td>
             <Th>
               게재 여부{' '}
               <Text as="span" color="red.400">
@@ -484,7 +503,7 @@ const FAQForm = ({
               </Text>
             </Th>
             <Td colSpan={4}>
-              <Box
+              <div
                 id="quill-element"
                 ref={quillElement}
                 style={{ height: '300px' }}

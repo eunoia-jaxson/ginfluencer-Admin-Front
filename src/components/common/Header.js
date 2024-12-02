@@ -1,15 +1,15 @@
-import { Image, Flex, Link, Button } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import footerLogo from "../../assets/images/footer_logo.png";
+import { Image, Flex, Link, Button } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import footerLogo from '../../assets/images/footer_logo.png';
 
 const Header = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      navigate("/");
+      navigate('/');
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error('Error logging out:', error);
     }
   };
 
@@ -40,7 +40,7 @@ const Header = () => {
           ml={4}
           variant="ghost" // 기본 버튼 스타일 대신 "ghost" 스타일을 사용하여 텍스트만 보이게
           color="white"
-          _hover={{ textDecoration: "none" }}
+          _hover={{ textDecoration: 'none' }}
         >
           로그아웃
         </Button>
