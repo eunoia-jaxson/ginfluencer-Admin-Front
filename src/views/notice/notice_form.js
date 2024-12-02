@@ -295,7 +295,6 @@ const Index = () => {
 
     const updatedContents = doc.body.innerHTML;
     setNotice((prevNotice) => ({ ...prevNotice, content: updatedContents }));
-    console.log(notice);
     setIsContentUpdated(true);
   };
 
@@ -322,7 +321,7 @@ const Index = () => {
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate('/admin/noticeList');
+            navigate('/noticeList');
           }
         } catch (error) {
           console.log(error);
@@ -485,7 +484,11 @@ const NoticeForm = ({
               제목<span style={{ color: 'red' }}> *</span>
             </Th>
             <Td colSpan={4}>
-              <ChakraInput value={title} onChange={onChange} placeholder={''} />
+              <ChakraInput
+                value={title}
+                onChange={onChange}
+                placeholder={'제목을 입력하세요'}
+              />
             </Td>
           </Tr>
           <Tr>

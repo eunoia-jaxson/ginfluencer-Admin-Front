@@ -17,7 +17,6 @@ import {
   useToast,
   Checkbox,
 } from '@chakra-ui/react';
-import HoverButton from '../../components/common/HoverButton';
 // import { AskAPI } from '../../../../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { makeClearValue } from '../../utils/safe';
@@ -29,6 +28,7 @@ const Index = () => {
   const toast = useToast();
 
   const [ask, setAsk] = useState({});
+  const [answer, setAnswer] = useState('');
   const [files, setFiles] = useState([]); // local에 선택된 파일들 정보저장
   const [deletedFiles, setDeletedFiles] = useState([]);
   const [isContentUpdated, setIsContentUpdated] = useState(false);
@@ -80,6 +80,7 @@ const Index = () => {
             image: response.data.image,
             email: response.data.email,
             emailChecked: response.data.emailChecked,
+            answer: response.data.answer,
           });
         } catch (error) {
           console.error('Failed to fetch notice:', error);
@@ -136,23 +137,18 @@ const Index = () => {
   const handleCreate = async () => {
     const userConfirmed = window.confirm('1:1문의를 등록하시겠나요?');
 
-    // if (userConfirmed) {
-    //   try {
-    //     await AskAPI.createAsk({ data: ask });
-    //     toast({
-    //       title: "1:1 문의가 등록되었습니다.",
-    //       status: "success",
-    //       isClosable: true,
-    //     });
-    //     return "success";
-    //   } catch (error) {
-    //     toast({
-    //       title: "오류가 발생했습니다.",
-    //       status: "error",
-    //       isClosable: true,
-    //     });
-    //   }
-    // }
+    if (userConfirmed) {
+      try {
+        await axios.post(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}/reply`,
+          { answer: answer }
+        );
+        navigate('/askList');
+      } catch (error) {
+        console.log('등록 에러', error);
+        return 'error';
+      }
+    }
   };
 
   const handleUpdate = async () => {
@@ -183,19 +179,17 @@ const Index = () => {
       '1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
     );
 
-    // if (userConfirmed) {
-    //   try {
-    //     await AskAPI.deleteAsk({ id: idx });
-    //     navigate("/admin/ASKList");
-    //     navigate(0);
-    //   } catch (error) {
-    //     toast({
-    //       title: "오류가 발생했습니다.",
-    //       status: "error",
-    //       isClosable: true,
-    //     });
-    //   }
-    // }
+    if (userConfirmed) {
+      try {
+        await axios.delete(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
+        );
+        navigate('/askList');
+        navigate(0);
+      } catch (error) {
+        alert('오류가 발생했습니다.');
+      }
+    }
   };
 
   const handleCancle = () => {
@@ -286,7 +280,7 @@ const Index = () => {
         if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
-          // image.src = downloadUrl;
+          image.src = downloadUrl;
         }
       } catch (error) {
         console.error('Error processing image:', error);
@@ -296,7 +290,7 @@ const Index = () => {
     await Promise.all(uploadImageAndChangeURL);
 
     const updatedContents = doc.body.innerHTML;
-    setAsk((prev) => ({ ...prev, answer: updatedContents, answerYn: 'Y' }));
+    setAnswer(updatedContents);
     setIsContentUpdated(true);
   };
 
@@ -306,17 +300,17 @@ const Index = () => {
         setIsLoading(true);
         try {
           let result;
-          if (!id) {
+          if (ask.answer === null) {
             result = await handleCreate();
           } else {
             result = await handleUpdate();
           }
 
-          // if (result === "error") {
-          //   setIsLoading(false);
-          //   alert("오류가 발생했습니다.");
-          //   return;
-          // }
+          if (result === 'error') {
+            setIsLoading(false);
+            alert('오류가 발생했습니다.');
+            return;
+          }
 
           await handleAddFile();
 
@@ -327,7 +321,7 @@ const Index = () => {
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate('/admin/askList');
+            navigate('/askList');
           }
         } catch (error) {
           console.log(error);
@@ -350,18 +344,20 @@ const Index = () => {
   return (
     <Box>
       {isLoading && <Spinner />}
-      <AskForm
-        data={ask}
-        files={files}
-        quillElement={quillElement}
-        quillInstance={quillInstance}
-        onChange={handleChange}
-        onFileChange={handleFileChange}
-        onDeleteFileChange={handleDeleteFileChange}
-        onDelete={handleDelete}
-        onSubmit={handleSubmit}
-        onCancle={handleCancle}
-      />
+      {!isLoading && (
+        <AskForm
+          data={ask}
+          files={files}
+          quillElement={quillElement}
+          quillInstance={quillInstance}
+          onChange={handleChange}
+          onFileChange={handleFileChange}
+          onDeleteFileChange={handleDeleteFileChange}
+          onDelete={handleDelete}
+          onSubmit={handleSubmit}
+          onCancle={handleCancle}
+        />
+      )}
     </Box>
   );
 };
@@ -380,8 +376,6 @@ const AskForm = ({
 }) => {
   const {
     answer,
-    answerDt,
-    answerYn,
     content,
     email,
     emailChecked,
@@ -392,6 +386,14 @@ const AskForm = ({
     fileName,
     filePath,
   } = data;
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const today = `${year}-${month >= 10 ? month : '0' + month}-${
+    day >= 10 ? day : '0' + day
+  }`;
 
   const askType = ['회원정보', '선한가게신청', '후원', '기타', '학생'];
 
@@ -525,7 +527,7 @@ const AskForm = ({
         <Tbody>
           <Tr>
             <Th>답변일</Th>
-            <Td>{answerDt}</Td>
+            <Td>{today}</Td>
           </Tr>
           <Tr>
             <Th>답변</Th>
@@ -552,15 +554,16 @@ const AskForm = ({
                   cursor="pointer"
                   onChange={onFileChange}
                   multiple
+                  zIndex={1}
                 />
-                <HoverButton
-                  title="파일첨부"
-                  w="24"
-                  h="8 md:h-10"
-                  textSize="xs md:text-sm"
-                  data={null}
-                  onPass={null}
-                />
+                <Button
+                  w={'24'}
+                  h={'8 md:h-10'}
+                  fontSize={'xs md:text-sm'}
+                  zIndex={0}
+                >
+                  파일첨부
+                </Button>
               </Box>
               <Box mt={2}>
                 {files.map((file, index) => (
