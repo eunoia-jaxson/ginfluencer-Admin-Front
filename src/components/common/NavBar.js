@@ -1,7 +1,7 @@
-import { Button, Link, Box, Text } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
-import { ADMIN_NAVIGATE_LIST, POST_CATEGORY } from "../../constants/admin";
-import { useLocation } from "react-router-dom";
+import { Button, Link, Box, Text } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
+import { ADMIN_NAVIGATE_LIST, POST_CATEGORY } from '../../constants/admin';
+import { useLocation } from 'react-router-dom';
 
 const NavBar = () => {
   const location = useLocation();
@@ -12,19 +12,19 @@ const NavBar = () => {
     <Box
       id="nav-bar"
       p={4}
-      display={{ base: "none", md: "block" }}
-      w={{ sm: "48" }}
+      display={{ base: 'none', md: 'block' }}
+      w={{ sm: '48' }}
       minH="100vh"
-      bgColor={"gray.100"}
+      bgColor={'gray.100'}
     >
       <Box p={2}>
         <Link as={RouterLink} to="/storeList">
           <Button
             variant="link"
             fontWeight="semibold"
-            color={isActive("storeList", "") ? "#365ca5" : "inherit"}
+            color={isActive('storeList', '') ? '#365ca5' : 'inherit'}
             whiteSpace="nowrap"
-            _hover={{ textDecoration: "none" }}
+            _hover={{ textDecoration: 'none' }}
           >
             선한영향력가게 관리
           </Button>
@@ -38,8 +38,8 @@ const NavBar = () => {
             mt={2}
             mb={1}
             fontWeight="semibold"
-            color={isActive("noticeList", "") ? "#365ca5" : "inherit"}
-            _hover={{ textDecoration: "none" }}
+            color={isActive('noticeList', '') ? '#365ca5' : 'inherit'}
+            _hover={{ textDecoration: 'none' }}
           >
             커뮤니티 관리
           </Button>
@@ -49,7 +49,7 @@ const NavBar = () => {
             as={RouterLink}
             to={url}
             key={url}
-            _hover={{ textDecoration: "none" }}
+            _hover={{ textDecoration: 'none' }}
           >
             <Text
               ml={2}
@@ -58,8 +58,8 @@ const NavBar = () => {
               pl={2}
               fontSize="sm"
               cursor="pointer"
-              color={isActive(url, "") ? "#365ca5" : "gray.500"}
-              fontWeight={isActive(url, "") ? "semibold" : "normal"}
+              color={isActive(url, '') ? '#365ca5' : 'gray.500'}
+              fontWeight={isActive(url, '') ? 'semibold' : 'normal'}
             >
               - {title}
             </Text>
@@ -74,20 +74,20 @@ const NavBar = () => {
             mt={2}
             mb={1}
             fontWeight="semibold"
-            color={isActive("post", "") ? "#365ca5" : "inherit"}
-            _hover={{ textDecoration: "none" }}
+            color={isActive('post', '') ? '#365ca5' : 'inherit'}
+            _hover={{ textDecoration: 'none' }}
           >
             홈페이지 관리
           </Button>
         </Link>
         {POST_CATEGORY.map(({ title, url }) => {
-          const query = new URLSearchParams(url.split("?")[1]).get("type");
+          const query = new URLSearchParams(url.split('?')[1]).get('type');
           return (
             <Link
               as={RouterLink}
               to={url}
               key={url}
-              _hover={{ textDecoration: "none" }}
+              _hover={{ textDecoration: 'none' }}
             >
               <Text
                 ml={2}
@@ -95,10 +95,10 @@ const NavBar = () => {
                 fontSize="sm"
                 cursor="pointer"
                 color={
-                  isActive("post", `type=${query}`) ? "#365ca5" : "gray.500"
+                  isActive('post', `type=${query}`) ? '#365ca5' : 'gray.500'
                 }
                 fontWeight={
-                  isActive("post", `type=${query}`) ? "semibold" : "normal"
+                  isActive('post', `type=${query}`) ? 'semibold' : 'normal'
                 }
               >
                 - {title}
