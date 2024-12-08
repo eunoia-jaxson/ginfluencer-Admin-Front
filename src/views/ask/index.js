@@ -131,7 +131,7 @@ const AskList = () => {
                         <Td key={name} textAlign="center" py={1}>
                           <Checkbox
                             isChecked={value !== null}
-                            isDisabled
+                            readOnly
                             colorScheme="blue"
                           />
                         </Td>

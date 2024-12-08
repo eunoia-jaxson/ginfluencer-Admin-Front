@@ -28,8 +28,13 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [faq, setFaq] = useState({
+<<<<<<< Updated upstream
     title: "",
     isOpened: "Y",
+=======
+    title: '',
+    isOpened: true,
+>>>>>>> Stashed changes
   });
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
@@ -62,13 +67,18 @@ const Index = () => {
             `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
           );
 
-          console.log(response.data);
-
           if (response.data.faqFiles !== null) {
             const serverFiles = response.data.faqFiles.map((file) => ({
               ...file,
+<<<<<<< Updated upstream
               state: "stable",
               type: "server",
+=======
+              oriName: file.originalFileName,
+              realName: file.originalFileName,
+              state: 'stable',
+              type: 'server',
+>>>>>>> Stashed changes
             }));
             setFiles(serverFiles);
           }
@@ -98,22 +108,26 @@ const Index = () => {
         return null;
       }
 
+      const formData = new FormData();
+      formData.append('file', file);
+
       return {
-        id: null,
         oriName: file.name,
         realName: file.name,
+<<<<<<< Updated upstream
         state: "new",
         type: "local",
         file,
+=======
+        state: 'new',
+        type: 'local',
+        file: formData,
+>>>>>>> Stashed changes
       };
     });
 
     const validFiles = newFiles.filter((file) => file !== null);
     setFiles((prevFiles) => [...prevFiles, ...validFiles]);
-    setFaq({
-      ...faq,
-      faqFiles: validFiles.map((file) => file.file),
-    });
   };
 
   const handleDeleteFileChange = (index) => {
@@ -124,6 +138,12 @@ const Index = () => {
     }
 
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFaq((prevFaq) => {
+      return {
+        ...prevFaq,
+        faqFiles: prevFaq.faqFiles.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const handleChange = (e) => {
@@ -136,6 +156,7 @@ const Index = () => {
     const userConfirmed = window.confirm("FAQ를 등록하시겠나요?");
     if (userConfirmed) {
       try {
+<<<<<<< Updated upstream
         await axios.post(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
           faq,
@@ -146,6 +167,29 @@ const Index = () => {
           }
         );
         navigate("/FAQList");
+=======
+        const fileList = await Promise.all(
+          files.map(async (file) => {
+            const fileResponse = await axios.post(
+              `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+              file.file,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }
+            );
+
+            return fileResponse.data;
+          })
+        );
+
+        await axios.post(`${process.env.REACT_APP_BASE_URL}/api/admin/faqs`, {
+          ...faq,
+          faqFiles: fileList,
+        });
+        navigate('/FAQList');
+>>>>>>> Stashed changes
       } catch (error) {
         console.log("등록 에러", error);
         return "error";
@@ -158,13 +202,35 @@ const Index = () => {
     if (userConfirmed) {
       try {
         if (!id) return;
+        const fileList = await Promise.all(
+          files
+            .filter((file) => file.type === 'local')
+            .map(async (file) => {
+              const fileResponse = await axios.post(
+                `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+                file.file,
+                {
+                  headers: {
+                    'Content-Type': 'multipart/form-data',
+                  },
+                }
+              );
+
+              return fileResponse.data;
+            })
+        );
+
         await axios.patch(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
-          faq,
           {
+<<<<<<< Updated upstream
             headers: {
               "Content-Type": "multipart/form-data",
             },
+=======
+            ...faq,
+            faqFiles: [...faq.faqFiles, ...fileList],
+>>>>>>> Stashed changes
           }
         );
         navigate("/FAQList");

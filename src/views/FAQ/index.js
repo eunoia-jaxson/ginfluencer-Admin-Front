@@ -69,7 +69,6 @@ const FAQList = () => {
 
       setFaqs(result.data);
       setTotalElements(result.data.length);
-      console.log(result.data);
       // setNotices(result['data']);
       // setTotalPages(result['page']['totalPages']);
       // setTotalElements(result['page']['totalElements']);
