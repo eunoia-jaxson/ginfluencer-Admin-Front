@@ -28,13 +28,8 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [faq, setFaq] = useState({
-<<<<<<< Updated upstream
-    title: "",
-    isOpened: "Y",
-=======
     title: '',
     isOpened: true,
->>>>>>> Stashed changes
   });
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
@@ -70,15 +65,10 @@ const Index = () => {
           if (response.data.faqFiles !== null) {
             const serverFiles = response.data.faqFiles.map((file) => ({
               ...file,
-<<<<<<< Updated upstream
-              state: "stable",
-              type: "server",
-=======
               oriName: file.originalFileName,
               realName: file.originalFileName,
               state: 'stable',
               type: 'server',
->>>>>>> Stashed changes
             }));
             setFiles(serverFiles);
           }
@@ -114,15 +104,9 @@ const Index = () => {
       return {
         oriName: file.name,
         realName: file.name,
-<<<<<<< Updated upstream
-        state: "new",
-        type: "local",
-        file,
-=======
         state: 'new',
         type: 'local',
         file: formData,
->>>>>>> Stashed changes
       };
     });
 
@@ -156,18 +140,6 @@ const Index = () => {
     const userConfirmed = window.confirm("FAQ를 등록하시겠나요?");
     if (userConfirmed) {
       try {
-<<<<<<< Updated upstream
-        await axios.post(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
-          faq,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        navigate("/FAQList");
-=======
         const fileList = await Promise.all(
           files.map(async (file) => {
             const fileResponse = await axios.post(
@@ -189,7 +161,6 @@ const Index = () => {
           faqFiles: fileList,
         });
         navigate('/FAQList');
->>>>>>> Stashed changes
       } catch (error) {
         console.log("등록 에러", error);
         return "error";
@@ -223,14 +194,8 @@ const Index = () => {
         await axios.patch(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
           {
-<<<<<<< Updated upstream
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-=======
             ...faq,
             faqFiles: [...faq.faqFiles, ...fileList],
->>>>>>> Stashed changes
           }
         );
         navigate("/FAQList");
