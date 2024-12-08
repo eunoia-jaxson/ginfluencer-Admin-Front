@@ -341,31 +341,48 @@ const StoreForm = ({ fetchAllStores }) => {
     };
 
     try {
-      if (!no) {
-        const response = await axios.put(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
-          storeData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          }
-        );
-        console.log("Store updated:", response.data);
-        navigate("/storeList");
-      } else {
-        const response = await axios.post(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
-          storeData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          }
-        );
-        console.log("Store created:", response.data);
+      // if (!no) {
+      //   const response = await axios.put(
+      //     `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`,
+      //     storeData,
+      //     {
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //         Accept: "application/json",
+      //       },
+      //     }
+      //   );
+      //   console.log("Store updated:", response.data);
+      //   navigate("/storeList");
+      // } else {
+      //   const response = await axios.post(
+      //     `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
+      //     storeData,
+      //     {
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //         Accept: "application/json",
+      //       },
+      //     }
+      //   );
+      //   console.log("Store created:", response.data);
+      //   navigate("/storeList");
+      // }
+      const url = no
+        ? `${process.env.REACT_APP_BASE_URL}/api/admin/stores/update/${no}`
+        : `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`;
+
+      const method = no ? "put" : "post";
+
+      const response = await axios({
+        method,
+        url,
+        data: storeData,
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.status === 200) {
+        alert(`가게 동행 신청이 ${no ? "수정" : "생성"}되었습니다.`);
         navigate("/storeList");
       }
     } catch (error) {
