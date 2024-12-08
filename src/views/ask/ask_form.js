@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { Quill } from "react-quill";
-import ImageResize from "quill-image-resize";
-import "react-quill/dist/quill.snow.css";
+import { useEffect, useState, useRef } from 'react';
+import { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize';
+import 'react-quill/dist/quill.snow.css';
 import {
   Box,
   Flex,
@@ -15,16 +15,10 @@ import {
   Spinner,
   useToast,
   Checkbox,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 // import { AskAPI } from '../../../../api';
-<<<<<<< Updated upstream
-import { useNavigate, useLocation } from "react-router-dom";
-import { makeClearValue } from "../../utils/safe";
-import axios from "axios";
-=======
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
->>>>>>> Stashed changes
 
 const Index = () => {
   const location = useLocation();
@@ -32,13 +26,7 @@ const Index = () => {
   const toast = useToast();
 
   const [ask, setAsk] = useState({});
-<<<<<<< Updated upstream
-  const [answer, setAnswer] = useState("");
-  const [files, setFiles] = useState([]); // local에 선택된 파일들 정보저장
-  const [deletedFiles, setDeletedFiles] = useState([]);
-=======
   const [answer, setAnswer] = useState('');
->>>>>>> Stashed changes
   const [isContentUpdated, setIsContentUpdated] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
@@ -46,17 +34,17 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const id = +queryParams.get("idx");
+  const id = +queryParams.get('idx');
 
   const mimeToExtension = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "application/pdf": ".pdf",
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'application/pdf': '.pdf',
   };
 
   const getExtensionFromMime = (mimeType) => {
-    return mimeToExtension[mimeType] || "";
+    return mimeToExtension[mimeType] || '';
   };
 
   useEffect(() => {
@@ -68,20 +56,6 @@ const Index = () => {
             `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
           );
 
-<<<<<<< Updated upstream
-          console.log(response.data);
-
-          if (response.data.image !== null) {
-            const serverFiles = response.data.image.map((file) => ({
-              ...file,
-              state: "stable",
-              type: "server",
-            }));
-            setFiles(serverFiles);
-          }
-
-=======
->>>>>>> Stashed changes
           setAsk({
             id: response.data.id,
             content: response.data.content,
@@ -94,7 +68,7 @@ const Index = () => {
             answer: response.data.answer,
           });
         } catch (error) {
-          console.error("Failed to fetch notice:", error);
+          console.error('Failed to fetch notice:', error);
         }
       }
       setIsLoading(false);
@@ -102,54 +76,8 @@ const Index = () => {
     fetchData();
   }, [location.search]);
 
-<<<<<<< Updated upstream
-  const handleFileChange = async (event) => {
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 10MB in bytes
-
-    const newFiles = Array.from(event.target.files).map((file) => {
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: `${file.name} 파일 크기는 30MB를 초과할 수 없습니다.`,
-          status: "error",
-          isClosable: true,
-        });
-        return null;
-      }
-
-      return {
-        id: null,
-        oriName: file.name,
-        realName: file.name,
-        state: "new",
-        type: "local",
-        file,
-      };
-    });
-
-    const validFiles = newFiles.filter((file) => file !== null);
-    setFiles((prevFiles) => [...prevFiles, ...validFiles]);
-  };
-
-  const handleDeleteFileChange = (index) => {
-    const fileToDelete = files[index];
-
-    if (fileToDelete.type === "server") {
-      setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
-    }
-
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const clearValue = makeClearValue(value);
-    setAsk({ ...ask, [name]: clearValue });
-  };
-
-=======
->>>>>>> Stashed changes
   const handleCreate = async () => {
-    const userConfirmed = window.confirm("1:1문의를 등록하시겠나요?");
+    const userConfirmed = window.confirm('1:1문의를 등록하시겠나요?');
 
     if (userConfirmed) {
       try {
@@ -157,16 +85,16 @@ const Index = () => {
           `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}/reply`,
           { answer: answer }
         );
-        navigate("/askList");
+        navigate('/askList');
       } catch (error) {
-        console.log("등록 에러", error);
-        return "error";
+        console.log('등록 에러', error);
+        return 'error';
       }
     }
   };
 
   const handleUpdate = async () => {
-    const userConfirmed = window.confirm("1:1문의를 수정하시겠나요?");
+    const userConfirmed = window.confirm('1:1문의를 수정하시겠나요?');
 
     // if (userConfirmed) {
     //   try {
@@ -190,7 +118,7 @@ const Index = () => {
 
   const handleDelete = async () => {
     const userConfirmed = window.confirm(
-      "1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다."
+      '1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
     );
 
     if (userConfirmed) {
@@ -198,69 +126,30 @@ const Index = () => {
         await axios.delete(
           `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
         );
-        navigate("/askList");
+        navigate('/askList');
         navigate(0);
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
 
   const handleCancle = () => {
     const userConfirmed = window.confirm(
-      "작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다."
+      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
     );
 
     if (userConfirmed) {
       try {
-        navigate("/askList");
+        navigate('/askList');
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
 
-<<<<<<< Updated upstream
-  const handleDeleteFile = async () => {
-    try {
-      const data = { idxs: [...deletedFiles] };
-      // await AskAPI.deleteFileAsk({ data });
-    } catch (error) {
-      console.log("에러", error);
-      toast({
-        title: "파일 삭제 중 오류가 발생했습니다.",
-        status: "error",
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleAddFile = async () => {
-    const formData = new FormData();
-    let hasAddedFile = false;
-
-    files.forEach((file) => {
-      if (file.state === "new" && file.type === "local") {
-        formData.append("files", file.file);
-        hasAddedFile = true;
-      }
-    });
-
-    if (!hasAddedFile) return "success";
-
-    // try {
-    //   await AskAPI.addFileAsk({ id: idx, data: formData });
-    //   return "success";
-    // } catch (error) {
-    //   console.log("에러", error);
-    //   return "error";
-    // }
-  };
-
-=======
->>>>>>> Stashed changes
   const base64ToBlob = (base64) => {
-    const byteString = atob(base64.split(",")[1]);
+    const byteString = atob(base64.split(',')[1]);
     const mimeType = base64.match(/data:(.*?);base64/)[1];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
@@ -276,7 +165,7 @@ const Index = () => {
     const extension = getExtensionFromMime(file.type);
     const fileName = `editor_embeded${extension}`;
 
-    formData.append("file", file, fileName);
+    formData.append('file', file, fileName);
 
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -287,20 +176,20 @@ const Index = () => {
     let answer = quillInstance.current.root.innerHTML;
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(answer, "text/html");
-    const images = doc.querySelectorAll("img");
+    const doc = parser.parseFromString(answer, 'text/html');
+    const images = doc.querySelectorAll('img');
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
       try {
         const base64url = image.src;
 
-        if (base64url.startsWith("data:image")) {
+        if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
           image.src = downloadUrl;
         }
       } catch (error) {
-        console.error("Error processing image:", error);
+        console.error('Error processing image:', error);
       }
     });
 
@@ -323,16 +212,16 @@ const Index = () => {
             result = await handleUpdate();
           }
 
-          if (result === "error") {
+          if (result === 'error') {
             setIsLoading(false);
-            alert("오류가 발생했습니다.");
+            alert('오류가 발생했습니다.');
             return;
           }
 
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate("/askList");
+            navigate('/askList');
           }
         } catch (error) {
           console.log(error);
@@ -345,7 +234,7 @@ const Index = () => {
 
   const handleSubmit = async () => {
     if (!quillInstance.current.root.innerHTML) {
-      alert("모든 필수 항목을 입력해주세요.");
+      alert('모든 필수 항목을 입력해주세요.');
       return;
     }
 
@@ -393,44 +282,44 @@ const AskForm = ({
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  const today = `${year}-${month >= 10 ? month : "0" + month}-${
-    day >= 10 ? day : "0" + day
+  const today = `${year}-${month >= 10 ? month : '0' + month}-${
+    day >= 10 ? day : '0' + day
   }`;
 
-  const askType = ["회원정보", "선한가게신청", "후원", "기타", "학생"];
+  const askType = ['회원정보', '선한가게신청', '후원', '기타', '학생'];
 
   const modules = {
     toolbar: [
       [{ font: [] }],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
       ],
-      ["image"],
+      ['image'],
       [{ align: [] }, { color: [] }, { background: [] }],
-      ["clean"],
+      ['clean'],
     ],
     ImageResize: {
       parchment: {
         image: {
-          attributes: ["width", "height", "align"],
+          attributes: ['width', 'height', 'align'],
         },
       },
     },
   };
 
-  Quill.register("modules/ImageResize", ImageResize);
+  Quill.register('modules/ImageResize', ImageResize);
 
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     quillInstance.current = new Quill(quillElement.current, {
-      theme: "snow",
-      placeholder: "내용을 작성해주세요.",
+      theme: 'snow',
+      placeholder: '내용을 작성해주세요.',
       modules: modules,
     });
     setInitialLoad(false);
@@ -451,12 +340,12 @@ const AskForm = ({
     try {
       if (answer) {
         const quill = quillInstance.current;
-        const formattedAnswer = answer.replace(/\n/g, "<br>");
+        const formattedAnswer = answer.replace(/\n/g, '<br>');
         const delta = quill.clipboard.convert(formattedAnswer);
-        quill.setContents(delta, "silent");
+        quill.setContents(delta, 'silent');
       }
     } catch (error) {
-      console.error("Quill 초기화 실패", error);
+      console.error('Quill 초기화 실패', error);
     }
   }, [answer]);
 
@@ -527,67 +416,10 @@ const AskForm = ({
               <Box
                 id="quill-element"
                 ref={quillElement}
-                style={{ height: "200px" }}
+                style={{ height: '200px' }}
               />
             </Td>
           </Tr>
-<<<<<<< Updated upstream
-          <Tr>
-            <Th>파일</Th>
-            <Td>
-              <Box position="relative" display="inline-block">
-                <Input
-                  type="file"
-                  id="fileUpload"
-                  position="absolute"
-                  inset="0"
-                  width="full"
-                  height="full"
-                  opacity="0"
-                  cursor="pointer"
-                  onChange={onFileChange}
-                  multiple
-                  zIndex={1}
-                />
-                <Button
-                  w={"24"}
-                  h={"8 md:h-10"}
-                  fontSize={"xs md:text-sm"}
-                  zIndex={0}
-                >
-                  파일첨부
-                </Button>
-              </Box>
-              <Box mt={2}>
-                {files.map((file, index) => (
-                  <Flex
-                    key={index}
-                    align="center"
-                    fontSize="sm"
-                    color="gray.700"
-                  >
-                    <Link
-                      href={`file/notice/${file.realName}`}
-                      download={file.oriName || file.name}
-                      textDecoration="underline"
-                    >
-                      {file.oriName || file.name}
-                    </Link>
-                    <Button
-                      variant="link"
-                      color="red.500"
-                      ml={2}
-                      onClick={() => onDeleteFileChange(index)}
-                    >
-                      삭제
-                    </Button>
-                  </Flex>
-                ))}
-              </Box>
-            </Td>
-          </Tr>
-=======
->>>>>>> Stashed changes
         </Tbody>
       </Table>
 
