@@ -38,7 +38,6 @@ export const FAQ_TABLE_LAYOUT = [
   { name: 'id', value: 'No.', width: 'w-1/12' },
   { name: 'title', value: '제목', width: '' },
   { name: 'createdDate', value: '작성일', width: 'w-[10%]' },
-  { name: 'isOpened', value: '노출 여부', width: 'w-1/12' },
 ];
 
 export const POPUP_TABLE_LAYOUT = [

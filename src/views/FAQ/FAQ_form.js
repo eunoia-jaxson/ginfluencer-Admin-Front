@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Flex,
@@ -12,16 +12,13 @@ import {
   Td,
   Text,
   Link,
-} from "@chakra-ui/react";
-import { Quill } from "react-quill";
-import ImageResize from "quill-image-resize";
-import "react-quill/dist/quill.snow.css";
-import { useNavigate, useLocation } from "react-router-dom";
-// import { NoticeAPI } from "../../../../api";
-import RatioSimpleInlineList2 from "../../components/common/RatioSimpleInlineList2";
-import { VIEW_TYPE } from "../../constants/admin";
-import { makeClearValue } from "../../utils/safe";
-import axios from "axios";
+} from '@chakra-ui/react';
+import { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize';
+import 'react-quill/dist/quill.snow.css';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { makeClearValue } from '../../utils/safe';
+import axios from 'axios';
 
 const Index = () => {
   const location = useLocation();
@@ -29,7 +26,6 @@ const Index = () => {
 
   const [faq, setFaq] = useState({
     title: '',
-    isOpened: true,
   });
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
@@ -40,17 +36,17 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const id = +queryParams.get("idx");
+  const id = +queryParams.get('idx');
 
   const mimeToExtension = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "application/pdf": ".pdf",
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'application/pdf': '.pdf',
   };
 
   const getExtensionFromMime = (mimeType) => {
-    return mimeToExtension[mimeType] || "";
+    return mimeToExtension[mimeType] || '';
   };
 
   useEffect(() => {
@@ -77,11 +73,10 @@ const Index = () => {
             id: response.data.id,
             content: response.data.content,
             title: response.data.title,
-            isOpened: response.data.isOpened,
             faqFiles: response.data.faqFiles,
           });
         } catch (error) {
-          console.error("Failed to fetch notice:", error);
+          console.error('Failed to fetch notice:', error);
         }
       }
       setIsLoading(false);
@@ -117,7 +112,7 @@ const Index = () => {
   const handleDeleteFileChange = (index) => {
     const fileToDelete = files[index];
 
-    if (fileToDelete.type === "server") {
+    if (fileToDelete.type === 'server') {
       setDeletedFiles((prev) => [...prev, fileToDelete.id]);
     }
 
@@ -137,7 +132,7 @@ const Index = () => {
   };
 
   const handleCreate = async () => {
-    const userConfirmed = window.confirm("FAQ를 등록하시겠나요?");
+    const userConfirmed = window.confirm('FAQ를 등록하시겠나요?');
     if (userConfirmed) {
       try {
         const fileList = await Promise.all(
@@ -162,14 +157,14 @@ const Index = () => {
         });
         navigate('/FAQList');
       } catch (error) {
-        console.log("등록 에러", error);
-        return "error";
+        console.log('등록 에러', error);
+        return 'error';
       }
     }
   };
 
   const handleUpdate = async () => {
-    const userConfirmed = window.confirm("FAQ를 수정하시겠나요?");
+    const userConfirmed = window.confirm('FAQ를 수정하시겠나요?');
     if (userConfirmed) {
       try {
         if (!id) return;
@@ -198,17 +193,17 @@ const Index = () => {
             faqFiles: [...faq.faqFiles, ...fileList],
           }
         );
-        navigate("/FAQList");
+        navigate('/FAQList');
       } catch (error) {
-        console.log("수정 에러", error);
-        return "error";
+        console.log('수정 에러', error);
+        return 'error';
       }
     }
   };
 
   const handleDelete = async () => {
     const userConfirmed = window.confirm(
-      "FAQ를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다."
+      'FAQ를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
     );
 
     if (userConfirmed) {
@@ -216,10 +211,10 @@ const Index = () => {
         await axios.delete(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
         );
-        navigate("/FAQList");
+        navigate('/FAQList');
         navigate(0);
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
@@ -236,14 +231,14 @@ const Index = () => {
 
   const handleCancle = () => {
     const userConfirmed = window.confirm(
-      "작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다."
+      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
     );
 
     if (userConfirmed) {
       try {
-        navigate("/FAQList");
+        navigate('/FAQList');
       } catch (error) {
-        alert("오류가 발생했습니다.");
+        alert('오류가 발생했습니다.');
       }
     }
   };
@@ -254,13 +249,13 @@ const Index = () => {
     let latestIdx = result;
 
     files.forEach((file) => {
-      if (file.state === "new" && file.type === "local") {
-        formData.append("files", file.file);
+      if (file.state === 'new' && file.type === 'local') {
+        formData.append('files', file.file);
         hasAddedFile = true;
       }
     });
 
-    if (!hasAddedFile) return "success";
+    if (!hasAddedFile) return 'success';
 
     // try {
     //   const addResult = await FaqAPI.addFileFaq({
@@ -276,7 +271,7 @@ const Index = () => {
   };
 
   const base64ToBlob = (base64) => {
-    const byteString = atob(base64.split(",")[1]);
+    const byteString = atob(base64.split(',')[1]);
     const mimeType = base64.match(/data:(.*?);base64/)[1];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
@@ -292,7 +287,7 @@ const Index = () => {
     const extension = getExtensionFromMime(file.type);
     const fileName = `editor_embeded${extension}`;
 
-    formData.append("file", file, fileName);
+    formData.append('file', file, fileName);
 
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -310,20 +305,20 @@ const Index = () => {
   const changeContent = async () => {
     let content = quillInstance.current.root.innerHTML;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(content, "text/html");
-    const images = doc.querySelectorAll("img");
+    const doc = parser.parseFromString(content, 'text/html');
+    const images = doc.querySelectorAll('img');
 
     const uploadImageAndChangeURL = Array.from(images).map(async (image) => {
       try {
         const base64url = image.src;
 
-        if (base64url.startsWith("data:image")) {
+        if (base64url.startsWith('data:image')) {
           const blobUrl = base64ToBlob(base64url);
           const downloadUrl = await uploadImageToServer(blobUrl);
           image.src = downloadUrl;
         }
       } catch (error) {
-        console.error("Error processing image:", error);
+        console.error('Error processing image:', error);
       }
     });
 
@@ -346,9 +341,9 @@ const Index = () => {
             result = await handleUpdate();
           }
 
-          if (result === "error") {
+          if (result === 'error') {
             setIsLoading(false);
-            alert("오류가 발생했습니다.");
+            alert('오류가 발생했습니다.');
             return;
           }
 
@@ -357,7 +352,7 @@ const Index = () => {
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate("/FAQList");
+            navigate('/FAQList');
           }
         } catch (error) {
           console.log(error);
@@ -369,8 +364,8 @@ const Index = () => {
   }, [isContentUpdated]);
 
   const handleSubmit = async () => {
-    if (!faq.title || !faq.isOpened || !quillInstance.current.root.innerHTML) {
-      alert("모든 필수 항목을 입력해주세요.");
+    if (!faq.title || !quillInstance.current.root.innerHTML) {
+      alert('모든 필수 항목을 입력해주세요.');
       return;
     }
 
@@ -410,48 +405,48 @@ const FAQForm = ({
   onSubmit,
   onCancle,
 }) => {
-  const { title, content, isOpened } = data;
+  const { title, content } = data;
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  const today = `${year}-${month >= 10 ? month : "0" + month}-${
-    day >= 10 ? day : "0" + day
+  const today = `${year}-${month >= 10 ? month : '0' + month}-${
+    day >= 10 ? day : '0' + day
   }`;
 
   const modules = {
     toolbar: [
       [{ font: [] }],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
       ],
-      ["image"],
+      ['image'],
       [{ align: [] }, { color: [] }, { background: [] }],
-      ["clean"],
+      ['clean'],
     ],
     ImageResize: {
       parchment: {
         image: {
-          attributes: ["width", "height", "align"],
+          attributes: ['width', 'height', 'align'],
         },
       },
     },
   };
 
-  Quill.register("modules/ImageResize", ImageResize);
+  Quill.register('modules/ImageResize', ImageResize);
 
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     quillInstance.current = new Quill(quillElement.current, {
-      theme: "snow",
-      placeholder: "내용을 작성해주세요.",
+      theme: 'snow',
+      placeholder: '내용을 작성해주세요.',
       modules: modules,
     });
     setInitialLoad(false);
@@ -473,10 +468,10 @@ const FAQForm = ({
       if (content) {
         const quill = quillInstance.current;
         const delta = quill.clipboard.convert(content);
-        quill.setContents(delta, "silent");
+        quill.setContents(delta, 'silent');
       }
     } catch (error) {
-      console.log("quill 초기화", error);
+      console.log('quill 초기화', error);
     }
   }, []);
 
@@ -492,28 +487,13 @@ const FAQForm = ({
         <Tbody>
           <Tr>
             <Th>등록일</Th>
-            <Td>{today}</Td>
-            <Th>
-              게재 여부{" "}
-              <Text as="span" color="red.400">
-                {" "}
-                *
-              </Text>
-            </Th>
-            <Td>
-              <RatioSimpleInlineList2
-                name="isOpened"
-                defaultValue={isOpened}
-                options={VIEW_TYPE}
-                handleChange={onChange}
-              />
-            </Td>
+            <Td w="full">{today}</Td>
           </Tr>
           <Tr>
             <Th>
-              제목{" "}
+              제목{' '}
               <Text as="span" color="red.400">
-                {" "}
+                {' '}
                 *
               </Text>
             </Th>
@@ -527,9 +507,9 @@ const FAQForm = ({
           </Tr>
           <Tr>
             <Th>
-              내용{" "}
+              내용{' '}
               <Text as="span" color="red.400">
-                {" "}
+                {' '}
                 *
               </Text>
             </Th>
@@ -537,7 +517,7 @@ const FAQForm = ({
               <div
                 id="quill-element"
                 ref={quillElement}
-                style={{ height: "300px" }}
+                style={{ height: '300px' }}
               />
             </Td>
           </Tr>
@@ -559,9 +539,9 @@ const FAQForm = ({
                   zIndex={1}
                 />
                 <Button
-                  w={"24"}
-                  h={"8 md:h-10"}
-                  fontSize={"xs md:text-sm"}
+                  w={'24'}
+                  h={'8 md:h-10'}
+                  fontSize={'xs md:text-sm'}
                   zIndex={0}
                 >
                   파일첨부
@@ -650,7 +630,7 @@ const ChakraInput = ({ value, placeholder, onChange }) => {
       shadow="sm"
       ring={1}
       ringColor="gray.300"
-      _placeholder={{ color: "gray.400" }}
+      _placeholder={{ color: 'gray.400' }}
       focusBorderColor="indigo.600"
       fontSize="sm"
       placeholder={placeholder}
