@@ -164,11 +164,6 @@ const Index = () => {
           })
         );
 
-        console.log({
-          ...faq,
-          faqFiles: fileList,
-        });
-
         await axios.post(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
           {
@@ -183,7 +178,7 @@ const Index = () => {
         );
         navigate('/FAQList');
       } catch (error) {
-        console.log('등록 에러', error);
+        alert('등록 에러', error);
         return 'error';
       }
     }
@@ -226,7 +221,7 @@ const Index = () => {
         );
         navigate('/FAQList');
       } catch (error) {
-        console.log('수정 에러', error);
+        alert('수정 에러', error);
         return 'error';
       }
     }
@@ -326,7 +321,7 @@ const Index = () => {
     formData.append('file', file, fileName);
 
     for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
+      alert(`${pair[0]}: ${pair[1]}`);
     }
 
     // try {
@@ -391,7 +386,7 @@ const Index = () => {
             navigate('/FAQList');
           }
         } catch (error) {
-          console.log(error);
+          alert(error);
           setIsLoading(false);
         }
       };
@@ -507,7 +502,7 @@ const FAQForm = ({
         quill.setContents(delta, 'silent');
       }
     } catch (error) {
-      console.log('quill 초기화', error);
+      alert('quill 초기화', error);
     }
   }, []);
 

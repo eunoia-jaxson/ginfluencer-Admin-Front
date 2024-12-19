@@ -69,7 +69,7 @@ const AskList = () => {
       //   // }));
       // }
     } catch (error) {
-      console.log(error);
+      alert(error);
     }
   }
 

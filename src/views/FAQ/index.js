@@ -1,22 +1,22 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from "@chakra-ui/react";
-import FAQForm from "./FAQ_form";
-import AdminTitle from "../../components/common/AdminTitle";
-import { useMatch, useNavigate } from "react-router-dom";
-import { FAQ_TABLE_LAYOUT, PAGE_SIZE } from "../../constants/admin";
-import { useState, useEffect } from "react";
-import PageButtonList from "../../components/common/PageButtonList";
-import axios from "axios";
+import { Box, Table, Thead, Tr, Th, Tbody, Td, Switch } from '@chakra-ui/react';
+import FAQForm from './FAQ_form';
+import AdminTitle from '../../components/common/AdminTitle';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { FAQ_TABLE_LAYOUT, PAGE_SIZE } from '../../constants/admin';
+import { useState, useEffect } from 'react';
+import PageButtonList from '../../components/common/PageButtonList';
+import axios from 'axios';
 
 const FAQList = () => {
   const [faqs, setFaqs] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const match = useMatch("/FAQList/FAQForm");
+  const match = useMatch('/FAQList/FAQForm');
   const navigate = useNavigate();
   const layout = FAQ_TABLE_LAYOUT;
   const data = faqs;
-  const form = "faqForm";
+  const form = 'faqForm';
 
   const handlePaginationNumber = (e) => {
     setCurPages(e.target.innerText - 1);
@@ -26,7 +26,7 @@ const FAQList = () => {
     if (curPages > 0) {
       setCurPages(curPages - 1);
     } else {
-      alert("첫 페이지 입니다.");
+      alert('첫 페이지 입니다.');
     }
   };
 
@@ -34,7 +34,7 @@ const FAQList = () => {
     if (curPages < totalPages - 1) {
       setCurPages(curPages + 1);
     } else {
-      alert("마지막 페이지 입니다.");
+      alert('마지막 페이지 입니다.');
     }
   };
 
@@ -62,7 +62,7 @@ const FAQList = () => {
       //   // }));
       // }
     } catch (error) {
-      console.log(error);
+      alert(error);
     }
   }
 
@@ -106,15 +106,15 @@ const FAQList = () => {
                     key={item.id}
                     borderBottomWidth="1px"
                     borderColor="gray.300"
-                    _hover={{ bg: "gray.50" }}
+                    _hover={{ bg: 'gray.50' }}
                   >
                     {layout.map(({ name }) => {
                       const value = item[name];
                       let tableValue = item[name];
 
-                      if (name === "createdDate") {
+                      if (name === 'createdDate') {
                         tableValue = value.slice(0, 10);
-                      } else if (name === "id") {
+                      } else if (name === 'id') {
                         return (
                           <Td
                             key={name}
