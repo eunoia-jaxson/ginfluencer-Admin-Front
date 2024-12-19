@@ -72,8 +72,8 @@ const Index = () => {
               ...file,
               oriName: file.originalFileName,
               realName: file.originalFileName,
-              state: "stable",
-              type: "server",
+              state: 'stable',
+              type: 'server',
             }));
             setFiles(serverFiles);
           }
@@ -105,13 +105,13 @@ const Index = () => {
       }
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
       return {
         oriName: file.name,
         realName: file.name,
-        state: "new",
-        type: "local",
+        state: 'new',
+        type: 'local',
         file: formData,
       };
     });
@@ -149,7 +149,7 @@ const Index = () => {
   };
 
   const handleCreate = async (e) => {
-    const userConfirmed = window.confirm("공지사항을 등록하시겠나요?");
+    const userConfirmed = window.confirm('공지사항을 등록하시겠나요?');
     if (userConfirmed) {
       try {
         const fileList = await Promise.all(
@@ -159,7 +159,7 @@ const Index = () => {
               file.file,
               {
                 headers: {
-                  "Content-Type": "multipart/form-data",
+                  'Content-Type': 'multipart/form-data',
                 },
               }
             );
@@ -186,20 +186,20 @@ const Index = () => {
   };
 
   const handleUpdate = async (e) => {
-    const userConfirmed = window.confirm("공지사항을 수정하시겠나요?");
+    const userConfirmed = window.confirm('공지사항을 수정하시겠나요?');
     if (userConfirmed) {
       try {
         if (!id) return;
         const fileList = await Promise.all(
           files
-            .filter((file) => file.type === "local")
+            .filter((file) => file.type === 'local')
             .map(async (file) => {
               const fileResponse = await axios.post(
                 `${process.env.REACT_APP_BASE_URL}/api/all/file`,
                 file.file,
                 {
                   headers: {
-                    "Content-Type": "multipart/form-data",
+                    'Content-Type': 'multipart/form-data',
                   },
                 }
               );
@@ -395,7 +395,6 @@ const Index = () => {
     if (
       !notice.title ||
       !notice.category ||
-      !notice.isOpened ||
       !quillInstance.current.root.innerHTML
     ) {
       alert('모든 필수 항목을 입력해주세요.');

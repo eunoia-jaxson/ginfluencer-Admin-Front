@@ -131,7 +131,7 @@ const AskList = () => {
                     } else if (name === 'type') {
                       tableValue = getTypeValueByCode(value);
                     } else if (name === 'createdDate') {
-                      tableValue = value;
+                      tableValue = value.slice(0, 10);
                     } else if (name === 'id') {
                       return (
                         <Td
