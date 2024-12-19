@@ -5,10 +5,11 @@ import {
   Button,
   Heading,
   useBreakpointValue,
-} from "@chakra-ui/react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import headerLogo from "../../assets/images/header_logo.png";
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import headerLogo from '../../assets/images/header_logo.png';
+import axios from 'axios';
 
 const Admin = () => {
   const padding = useBreakpointValue({ base: 8, md: 12 });
@@ -35,8 +36,17 @@ const Admin = () => {
     }
 
     try {
-      if (form.userId === "admin" && form.passwd === "1234") {
-        navigate("/storeList");
+      const result = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/api/login/admin`,
+        {
+          email: form.userId,
+          password: form.passwd,
+        }
+      );
+
+      if (result.headers.refreshtoken !== undefined) {
+        localStorage.setItem('refreshToken', result.headers.refreshtoken);
+        navigate('/storeList');
       } else {
         alert("아이디 혹은 비밀번호가 틀렸습니다.");
       }

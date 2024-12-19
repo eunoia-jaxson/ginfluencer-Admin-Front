@@ -7,6 +7,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('refreshToken');
       navigate('/');
     } catch (error) {
       console.error('Error logging out:', error);

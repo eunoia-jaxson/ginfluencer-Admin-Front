@@ -53,7 +53,12 @@ const Index = () => {
       if (id) {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
+            `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`,
+            {
+              headers: {
+                Authorization: `${localStorage.getItem('refreshToken')}`,
+              },
+            }
           );
 
           setAsk({
@@ -83,7 +88,12 @@ const Index = () => {
       try {
         await axios.post(
           `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}/reply`,
-          { answer: answer }
+          { answer: answer },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('refreshToken')}`,
+            },
+          }
         );
         navigate("/askList");
       } catch (error) {
@@ -124,7 +134,12 @@ const Index = () => {
     if (userConfirmed) {
       try {
         await axios.delete(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
+          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('refreshToken')}`,
+            },
+          }
         );
         navigate("/askList");
         navigate(0);

@@ -40,7 +40,12 @@ const NoticeList = () => {
   async function fetchData() {
     try {
       const result = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('refreshToken')}`,
+          },
+        }
       );
 
       setNotices(result.data);
@@ -72,7 +77,8 @@ const NoticeList = () => {
         data,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            'Content-Type': 'multipart/form-data',
+            Authorization: `${localStorage.getItem('refreshToken')}`,
           },
         }
       );

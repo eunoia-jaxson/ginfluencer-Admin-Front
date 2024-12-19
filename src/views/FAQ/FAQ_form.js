@@ -55,7 +55,12 @@ const Index = () => {
       if (id) {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
+            `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
+            {
+              headers: {
+                Authorization: `${localStorage.getItem('refreshToken')}`,
+              },
+            }
           );
 
           if (response.data.faqFiles !== null) {
@@ -155,11 +160,19 @@ const Index = () => {
           })
         );
 
-        await axios.post(`${process.env.REACT_APP_BASE_URL}/api/admin/faqs`, {
-          ...faq,
-          faqFiles: fileList,
-        });
-        navigate("/FAQList");
+        await axios.post(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
+          {
+            ...faq,
+            faqFiles: fileList,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('refreshToken')}`,
+            },
+          }
+        );
+        navigate('/FAQList');
       } catch (error) {
         console.log("등록 에러", error);
         return "error";
@@ -195,6 +208,11 @@ const Index = () => {
           {
             ...faq,
             faqFiles: [...faq.faqFiles, ...fileList],
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('refreshToken')}`,
+            },
           }
         );
         navigate("/FAQList");
@@ -213,7 +231,12 @@ const Index = () => {
     if (userConfirmed) {
       try {
         await axios.delete(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
+          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem('refreshToken')}`,
+            },
+          }
         );
         navigate("/FAQList");
         navigate(0);

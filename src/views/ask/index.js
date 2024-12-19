@@ -1,23 +1,23 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
-import AskForm from "./ask_form";
-import AdminTitle from "../../components/common/AdminTitle";
-import { useMatch, useNavigate } from "react-router-dom";
-import { ASK_TABLE_LAYOUT, PAGE_SIZE, ASK_TYPE } from "../../constants/admin";
-import { useState, useEffect } from "react";
-import PageButtonList from "../../components/common/PageButtonList";
-import { Checkbox } from "@chakra-ui/react";
-import axios from "axios";
+import { Box, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
+import AskForm from './ask_form';
+import AdminTitle from '../../components/common/AdminTitle';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { ASK_TABLE_LAYOUT, ASK_TYPE } from '../../constants/admin';
+import { useState, useEffect } from 'react';
+import PageButtonList from '../../components/common/PageButtonList';
+import { Checkbox } from '@chakra-ui/react';
+import axios from 'axios';
 
 const AskList = () => {
   const [asks, setAsks] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const match = useMatch("/askList/askForm");
+  const match = useMatch('/askList/askForm');
   const navigate = useNavigate();
   const layout = ASK_TABLE_LAYOUT;
   const data = asks;
-  const form = "askForm";
+  const form = 'askForm';
 
   const handlePaginationNumber = (e) => {
     setCurPages(e.target.innerText - 1);
@@ -27,7 +27,7 @@ const AskList = () => {
     if (curPages > 0) {
       setCurPages(curPages - 1);
     } else {
-      alert("첫 페이지 입니다.");
+      alert('첫 페이지 입니다.');
     }
   };
 
@@ -35,32 +35,24 @@ const AskList = () => {
     if (curPages < totalPages - 1) {
       setCurPages(curPages + 1);
     } else {
-      alert("마지막 페이지 입니다.");
-    }
-  };
-
-  const handleToggle = async ({ index, id, enabled }) => {
-    if (id === null || id === undefined) {
-      id = asks[index].idx;
-    }
-
-    try {
-      const data = { viewYn: enabled ? "N" : "Y" };
-      // const result = await NoticeAPI.updateNotice({ id, data });
-    } catch (error) {
-      console.log("에러", error);
+      alert('마지막 페이지 입니다.');
     }
   };
 
   const getTypeValueByCode = (code) => {
     const type = ASK_TYPE.find((item) => item.code === code);
-    return type ? type.value : "Undefined";
+    return type ? type.value : 'Undefined';
   };
 
   async function fetchData() {
     try {
       const result = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('refreshToken')}`,
+          },
+        }
       );
 
       setAsks(result.data);
@@ -87,7 +79,7 @@ const AskList = () => {
 
   return (
     <Box id="white-box" flex="1" bg="white" p={4}>
-      <AdminTitle hasAddButton={null} title="1:1 문의" form={""} />
+      <AdminTitle hasAddButton={null} title="1:1 문의" form={''} />
       {match ? (
         <Box id="ask-form">
           <AskForm />
@@ -120,13 +112,13 @@ const AskList = () => {
                   key={item.id}
                   borderBottomWidth="1px"
                   borderColor="gray.300"
-                  _hover={{ bg: "gray.50" }}
+                  _hover={{ bg: 'gray.50' }}
                 >
                   {layout.map(({ name }) => {
                     const value = item[name];
                     let tableValue = item[name];
 
-                    if (name === "answer") {
+                    if (name === 'answer') {
                       return (
                         <Td key={name} textAlign="center" py={1}>
                           <Checkbox
@@ -136,11 +128,11 @@ const AskList = () => {
                           />
                         </Td>
                       );
-                    } else if (name === "type") {
+                    } else if (name === 'type') {
                       tableValue = getTypeValueByCode(value);
-                    } else if (name === "createdDate") {
+                    } else if (name === 'createdDate') {
                       tableValue = value;
-                    } else if (name === "id") {
+                    } else if (name === 'id') {
                       return (
                         <Td
                           key={name}

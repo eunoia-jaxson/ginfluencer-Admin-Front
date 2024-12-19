@@ -41,7 +41,12 @@ const FAQList = () => {
   async function fetchData() {
     try {
       const result = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('refreshToken')}`,
+          },
+        }
       );
 
       setFaqs(result.data);

@@ -12,10 +12,20 @@ import AskForm from './views/ask/ask_form';
 import FAQForm from './views/FAQ/FAQ_form';
 import Header from './components/common/Header';
 import NavBar from './components/common/NavBar';
-import { Fragment } from 'react';
+import { useEffect } from 'react';
 
 function App() {
   const location = useLocation();
+
+  useEffect(() => {
+    const authToken = localStorage.getItem('refreshToken');
+    if (!authToken && location.pathname !== '/') {
+      alert('로그인이 필요합니다.');
+      window.location.href = '/';
+    } else if (authToken && location.pathname === '/') {
+      window.location.href = '/storeList';
+    }
+  }, [location.pathname]);
 
   return (
     <>
