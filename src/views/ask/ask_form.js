@@ -10,17 +10,15 @@ import {
   Tr,
   Th,
   Td,
-  Input,
   Button,
   Link,
   Spinner,
   useToast,
   Checkbox,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 // import { AskAPI } from '../../../../api';
-import { useNavigate, useLocation } from "react-router-dom";
-import { makeClearValue } from "../../utils/safe";
-import axios from "axios";
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const Index = () => {
   const location = useLocation();
@@ -28,9 +26,7 @@ const Index = () => {
   const toast = useToast();
 
   const [ask, setAsk] = useState({});
-  const [answer, setAnswer] = useState("");
-  const [files, setFiles] = useState([]); // local에 선택된 파일들 정보저장
-  const [deletedFiles, setDeletedFiles] = useState([]);
+  const [answer, setAnswer] = useState('');
   const [isContentUpdated, setIsContentUpdated] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
@@ -38,7 +34,7 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const id = +queryParams.get("idx");
+  const id = +queryParams.get('idx');
 
   const mimeToExtension = {
     "image/jpeg": ".jpg",
@@ -60,17 +56,6 @@ const Index = () => {
             `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
           );
 
-          console.log(response.data);
-
-          if (response.data.image !== null) {
-            const serverFiles = response.data.image.map((file) => ({
-              ...file,
-              state: "stable",
-              type: "server",
-            }));
-            setFiles(serverFiles);
-          }
-
           setAsk({
             id: response.data.id,
             content: response.data.content,
@@ -83,56 +68,13 @@ const Index = () => {
             answer: response.data.answer,
           });
         } catch (error) {
-          console.error("Failed to fetch notice:", error);
+          console.error('Failed to fetch notice:', error);
         }
       }
       setIsLoading(false);
     }
     fetchData();
   }, [location.search]);
-
-  const handleFileChange = async (event) => {
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 10MB in bytes
-
-    const newFiles = Array.from(event.target.files).map((file) => {
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: `${file.name} 파일 크기는 30MB를 초과할 수 없습니다.`,
-          status: "error",
-          isClosable: true,
-        });
-        return null;
-      }
-
-      return {
-        id: null,
-        oriName: file.name,
-        realName: file.name,
-        state: "new",
-        type: "local",
-        file,
-      };
-    });
-
-    const validFiles = newFiles.filter((file) => file !== null);
-    setFiles((prevFiles) => [...prevFiles, ...validFiles]);
-  };
-
-  const handleDeleteFileChange = (index) => {
-    const fileToDelete = files[index];
-
-    if (fileToDelete.type === "server") {
-      setDeletedFiles((prev) => [...prev, fileToDelete.idx]);
-    }
-
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const clearValue = makeClearValue(value);
-    setAsk({ ...ask, [name]: clearValue });
-  };
 
   const handleCreate = async () => {
     const userConfirmed = window.confirm("1:1문의를 등록하시겠나요?");
@@ -143,10 +85,10 @@ const Index = () => {
           `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}/reply`,
           { answer: answer }
         );
-        navigate("/askList");
+        navigate('/askList');
       } catch (error) {
-        console.log("등록 에러", error);
-        return "error";
+        console.log('등록 에러', error);
+        return 'error';
       }
     }
   };
@@ -176,7 +118,25 @@ const Index = () => {
 
   const handleDelete = async () => {
     const userConfirmed = window.confirm(
-      "1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다."
+      '1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
+    );
+
+    if (userConfirmed) {
+      try {
+        await axios.delete(
+          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
+        );
+        navigate('/askList');
+        navigate(0);
+      } catch (error) {
+        alert('오류가 발생했습니다.');
+      }
+    }
+  };
+
+  const handleCancle = () => {
+    const userConfirmed = window.confirm(
+      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
     );
 
     if (userConfirmed) {
@@ -204,42 +164,6 @@ const Index = () => {
         alert("오류가 발생했습니다.");
       }
     }
-  };
-
-  const handleDeleteFile = async () => {
-    try {
-      const data = { idxs: [...deletedFiles] };
-      // await AskAPI.deleteFileAsk({ data });
-    } catch (error) {
-      console.log("에러", error);
-      toast({
-        title: "파일 삭제 중 오류가 발생했습니다.",
-        status: "error",
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleAddFile = async () => {
-    const formData = new FormData();
-    let hasAddedFile = false;
-
-    files.forEach((file) => {
-      if (file.state === "new" && file.type === "local") {
-        formData.append("files", file.file);
-        hasAddedFile = true;
-      }
-    });
-
-    if (!hasAddedFile) return "success";
-
-    // try {
-    //   await AskAPI.addFileAsk({ id: idx, data: formData });
-    //   return "success";
-    // } catch (error) {
-    //   console.log("에러", error);
-    //   return "error";
-    // }
   };
 
   const base64ToBlob = (base64) => {
@@ -306,22 +230,16 @@ const Index = () => {
             result = await handleUpdate();
           }
 
-          if (result === "error") {
+          if (result === 'error') {
             setIsLoading(false);
-            alert("오류가 발생했습니다.");
+            alert('오류가 발생했습니다.');
             return;
-          }
-
-          await handleAddFile();
-
-          if (deletedFiles.length > 0) {
-            await handleDeleteFile();
           }
 
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate("/askList");
+            navigate('/askList');
           }
         } catch (error) {
           console.log(error);
@@ -347,12 +265,8 @@ const Index = () => {
       {!isLoading && (
         <AskForm
           data={ask}
-          files={files}
           quillElement={quillElement}
           quillInstance={quillInstance}
-          onChange={handleChange}
-          onFileChange={handleFileChange}
-          onDeleteFileChange={handleDeleteFileChange}
           onDelete={handleDelete}
           onSubmit={handleSubmit}
           onCancle={handleCancle}
@@ -364,11 +278,7 @@ const Index = () => {
 
 const AskForm = ({
   data,
-  onChange,
-  onFileChange,
-  onDeleteFileChange,
   onDelete,
-  files,
   quillElement,
   quillInstance,
   onSubmit,
@@ -382,14 +292,17 @@ const AskForm = ({
     regDt,
     isSecret,
     title,
-    type,
-    fileName,
-    filePath,
+    category,
+    image,
   } = data;
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
+
+  const today = `${year}-${month >= 10 ? month : '0' + month}-${
+    day >= 10 ? day : '0' + day
+  }`;
 
   const today = `${year}-${month >= 10 ? month : "0" + month}-${
     day >= 10 ? day : "0" + day
@@ -472,16 +385,12 @@ const AskForm = ({
         <Tbody>
           <Tr>
             <Th>문의구분</Th>
-            <Td>{askType[type - 1]}</Td>
+            <Td>{askType.find((type) => type === category)}</Td>
             <Th>수신 이메일</Th>
             <Td>{email}</Td>
             <Th>이메일 수신여부</Th>
             <Td>
-              <Checkbox
-                isChecked={emailChecked}
-                isDisabled
-                colorScheme="blue"
-              />
+              <Checkbox isChecked={emailChecked} readOnly colorScheme="blue" />
             </Td>
           </Tr>
           <Tr>
@@ -491,19 +400,13 @@ const AskForm = ({
             </Td>
             <Th>비밀글 여부</Th>
             <Td>
-              <Checkbox isChecked={isSecret} isDisabled colorScheme="blue" />
+              <Checkbox isChecked={isSecret} readOnly colorScheme="blue" />
             </Td>
           </Tr>
           <Tr>
             <Th>첨부파일</Th>
             <Td colSpan={3}>
-              <Link
-                href={`/file/ask/${filePath}`}
-                download={fileName}
-                textDecoration="underline"
-              >
-                {fileName}
-              </Link>
+              <img src={`${image}`} alt="attachment" />
             </Td>
             <Th>등록일</Th>
             <Td>{regDt}</Td>
@@ -537,60 +440,6 @@ const AskForm = ({
                 ref={quillElement}
                 style={{ height: "200px" }}
               />
-            </Td>
-          </Tr>
-          <Tr>
-            <Th>파일</Th>
-            <Td>
-              <Box position="relative" display="inline-block">
-                <Input
-                  type="file"
-                  id="fileUpload"
-                  position="absolute"
-                  inset="0"
-                  width="full"
-                  height="full"
-                  opacity="0"
-                  cursor="pointer"
-                  onChange={onFileChange}
-                  multiple
-                  zIndex={1}
-                />
-                <Button
-                  w={"24"}
-                  h={"8 md:h-10"}
-                  fontSize={"xs md:text-sm"}
-                  zIndex={0}
-                >
-                  파일첨부
-                </Button>
-              </Box>
-              <Box mt={2}>
-                {files.map((file, index) => (
-                  <Flex
-                    key={index}
-                    align="center"
-                    fontSize="sm"
-                    color="gray.700"
-                  >
-                    <Link
-                      href={`file/notice/${file.realName}`}
-                      download={file.oriName || file.name}
-                      textDecoration="underline"
-                    >
-                      {file.oriName || file.name}
-                    </Link>
-                    <Button
-                      variant="link"
-                      color="red.500"
-                      ml={2}
-                      onClick={() => onDeleteFileChange(index)}
-                    >
-                      삭제
-                    </Button>
-                  </Flex>
-                ))}
-              </Box>
             </Td>
           </Tr>
         </Tbody>

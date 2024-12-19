@@ -17,9 +17,6 @@ import { Quill } from "react-quill";
 import ImageResize from "quill-image-resize";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate, useLocation } from "react-router-dom";
-// import { NoticeAPI } from "../../../../api";
-import RatioSimpleInlineList2 from "../../components/common/RatioSimpleInlineList2";
-import { VIEW_TYPE } from "../../constants/admin";
 import { makeClearValue } from "../../utils/safe";
 import axios from "axios";
 
@@ -29,7 +26,6 @@ const Index = () => {
 
   const [faq, setFaq] = useState({
     title: "",
-    isOpened: "Y",
   });
   const [files, setFiles] = useState([]);
   const [deletedFiles, setDeletedFiles] = useState([]);
@@ -62,11 +58,11 @@ const Index = () => {
             `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`
           );
 
-          console.log(response.data);
-
           if (response.data.faqFiles !== null) {
             const serverFiles = response.data.faqFiles.map((file) => ({
               ...file,
+              oriName: file.originalFileName,
+              realName: file.originalFileName,
               state: "stable",
               type: "server",
             }));
@@ -77,7 +73,6 @@ const Index = () => {
             id: response.data.id,
             content: response.data.content,
             title: response.data.title,
-            isOpened: response.data.isOpened,
             faqFiles: response.data.faqFiles,
           });
         } catch (error) {
@@ -98,13 +93,15 @@ const Index = () => {
         return null;
       }
 
+      const formData = new FormData();
+      formData.append("file", file);
+
       return {
-        id: null,
         oriName: file.name,
         realName: file.name,
         state: "new",
         type: "local",
-        file,
+        file: formData,
       };
     });
 
@@ -124,6 +121,12 @@ const Index = () => {
     }
 
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFaq((prevFaq) => {
+      return {
+        ...prevFaq,
+        faqFiles: prevFaq.faqFiles.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const handleChange = (e) => {
@@ -136,15 +139,26 @@ const Index = () => {
     const userConfirmed = window.confirm("FAQ를 등록하시겠나요?");
     if (userConfirmed) {
       try {
-        await axios.post(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/faqs`,
-          faq,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+        const fileList = await Promise.all(
+          files.map(async (file) => {
+            const fileResponse = await axios.post(
+              `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+              file.file,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+            return fileResponse.data;
+          })
         );
+
+        await axios.post(`${process.env.REACT_APP_BASE_URL}/api/admin/faqs`, {
+          ...faq,
+          faqFiles: fileList,
+        });
         navigate("/FAQList");
       } catch (error) {
         console.log("등록 에러", error);
@@ -158,13 +172,29 @@ const Index = () => {
     if (userConfirmed) {
       try {
         if (!id) return;
+        const fileList = await Promise.all(
+          files
+            .filter((file) => file.type === "local")
+            .map(async (file) => {
+              const fileResponse = await axios.post(
+                `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+                file.file,
+                {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                }
+              );
+
+              return fileResponse.data;
+            })
+        );
+
         await axios.patch(
           `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
-          faq,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            ...faq,
+            faqFiles: [...faq.faqFiles, ...fileList],
           }
         );
         navigate("/FAQList");
@@ -338,7 +368,7 @@ const Index = () => {
   }, [isContentUpdated]);
 
   const handleSubmit = async () => {
-    if (!faq.title || !faq.isOpened || !quillInstance.current.root.innerHTML) {
+    if (!faq.title || !quillInstance.current.root.innerHTML) {
       alert("모든 필수 항목을 입력해주세요.");
       return;
     }
@@ -379,7 +409,7 @@ const FAQForm = ({
   onSubmit,
   onCancle,
 }) => {
-  const { title, content, isOpened } = data;
+  const { title, content } = data;
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -461,22 +491,7 @@ const FAQForm = ({
         <Tbody>
           <Tr>
             <Th>등록일</Th>
-            <Td>{today}</Td>
-            <Th>
-              게재 여부{" "}
-              <Text as="span" color="red.400">
-                {" "}
-                *
-              </Text>
-            </Th>
-            <Td>
-              <RatioSimpleInlineList2
-                name="isOpened"
-                defaultValue={isOpened}
-                options={VIEW_TYPE}
-                handleChange={onChange}
-              />
-            </Td>
+            <Td w="full">{today}</Td>
           </Tr>
           <Tr>
             <Th>

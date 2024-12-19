@@ -38,29 +38,6 @@ const FAQList = () => {
     }
   };
 
-  const handleToggle = async (index, id, enabled) => {
-    if (id === null || id === undefined) {
-      id = faqs[index].id;
-    }
-
-    try {
-      const data = { ...faqs[index], isOpened: enabled };
-      await axios.patch(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/faqs/${id}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      fetchData();
-    } catch (error) {
-      console.log("에러", error);
-    }
-  };
-
   async function fetchData() {
     try {
       const result = await axios.get(
@@ -69,7 +46,6 @@ const FAQList = () => {
 
       setFaqs(result.data);
       setTotalElements(result.data.length);
-      console.log(result.data);
       // setNotices(result['data']);
       // setTotalPages(result['page']['totalPages']);
       // setTotalElements(result['page']['totalElements']);
@@ -131,19 +107,8 @@ const FAQList = () => {
                       const value = item[name];
                       let tableValue = item[name];
 
-                      if (name === "isOpened") {
-                        return (
-                          <Td key={name} textAlign="center" py={1}>
-                            <Switch
-                              isChecked={item.isOpened}
-                              onChange={() =>
-                                handleToggle(index, item.id, !item.isOpened)
-                              }
-                            />
-                          </Td>
-                        );
-                      } else if (name === "createdDate") {
-                        tableValue = value;
+                      if (name === "createdDate") {
+                        tableValue = value.slice(0, 10);
                       } else if (name === "id") {
                         return (
                           <Td

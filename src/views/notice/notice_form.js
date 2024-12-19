@@ -65,6 +65,8 @@ const Index = () => {
           if (response.data.announcementFiles !== null) {
             const serverFiles = response.data.announcementFiles.map((file) => ({
               ...file,
+              oriName: file.originalFileName,
+              realName: file.originalFileName,
               state: "stable",
               type: "server",
             }));
@@ -97,13 +99,15 @@ const Index = () => {
         return null;
       }
 
+      const formData = new FormData();
+      formData.append("file", file);
+
       return {
-        id: null,
         oriName: file.name,
         realName: file.name,
         state: "new",
         type: "local",
-        file,
+        file: formData,
       };
     });
 
@@ -123,6 +127,14 @@ const Index = () => {
     }
 
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setNotice((prevNotice) => {
+      return {
+        ...prevNotice,
+        announcementFiles: prevNotice.announcementFiles.filter(
+          (_, i) => i !== index
+        ),
+      };
+    });
   };
 
   const handleChange = (e) => {
@@ -131,18 +143,29 @@ const Index = () => {
     setNotice({ ...notice, [name]: clearValue });
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
     const userConfirmed = window.confirm("공지사항을 등록하시겠나요?");
     if (userConfirmed) {
       try {
+        const fileList = await Promise.all(
+          files.map(async (file) => {
+            const fileResponse = await axios.post(
+              `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+              file.file,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+            return fileResponse.data;
+          })
+        );
+
         await axios.post(
           `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`,
-          notice,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          { ...notice, announcementFiles: fileList }
         );
         navigate("/NoticeList");
       } catch (error) {
@@ -152,18 +175,34 @@ const Index = () => {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e) => {
     const userConfirmed = window.confirm("공지사항을 수정하시겠나요?");
     if (userConfirmed) {
       try {
         if (!id) return;
+        const fileList = await Promise.all(
+          files
+            .filter((file) => file.type === "local")
+            .map(async (file) => {
+              const fileResponse = await axios.post(
+                `${process.env.REACT_APP_BASE_URL}/api/all/file`,
+                file.file,
+                {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                }
+              );
+
+              return fileResponse.data;
+            })
+        );
+
         await axios.patch(
           `${process.env.REACT_APP_BASE_URL}/api/admin/announcements/${id}`,
-          notice,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            ...notice,
+            announcementFiles: [...notice.announcementFiles, ...fileList],
           }
         );
         navigate("/NoticeList");
