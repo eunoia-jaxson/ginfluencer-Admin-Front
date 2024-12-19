@@ -99,7 +99,11 @@ const StoreList = () => {
   // 특정 가게 불러오기 API 함수
   const fetchStoreById = async (no) => {
     try {
-      const response = await axiosInstance.get(`/api/admin/stores/get/${no}`);
+      const response = await axiosInstance.get(`/api/admin/stores/get/${no}`, {
+        headers: {
+          Authorization: `${localStorage.getItem("refreshToken")}`,
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("Error fetching store:", error);
@@ -125,7 +129,7 @@ const StoreList = () => {
   const createStore = async (storeData) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
+        `${process.env.REACT_APP_BASE_URL}/api/login/signup`,
         storeData
       );
       return response.data;
@@ -142,6 +146,7 @@ const StoreList = () => {
         updatedData,
         {
           headers: {
+            Authorization: `${localStorage.getItem("refreshToken")}`,
             "Content-Type": "application/json",
             Accept: "application/json",
             "Access-Control-Allow-Origin": "http://localhost:3000", // 로컬 개발 환경에 맞게 설정
