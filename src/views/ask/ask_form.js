@@ -15,10 +15,10 @@ import {
   Spinner,
   useToast,
   Checkbox,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 // import { AskAPI } from '../../../../api';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const Index = () => {
   const location = useLocation();
@@ -26,7 +26,7 @@ const Index = () => {
   const toast = useToast();
 
   const [ask, setAsk] = useState({});
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
   const [isContentUpdated, setIsContentUpdated] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
@@ -34,7 +34,7 @@ const Index = () => {
   const quillInstance = useRef(null);
 
   const queryParams = new URLSearchParams(location.search);
-  const id = +queryParams.get('idx');
+  const id = +queryParams.get("idx");
 
   const mimeToExtension = {
     "image/jpeg": ".jpg",
@@ -68,7 +68,7 @@ const Index = () => {
             answer: response.data.answer,
           });
         } catch (error) {
-          console.error('Failed to fetch notice:', error);
+          console.error("Failed to fetch notice:", error);
         }
       }
       setIsLoading(false);
@@ -85,10 +85,10 @@ const Index = () => {
           `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}/reply`,
           { answer: answer }
         );
-        navigate('/askList');
+        navigate("/askList");
       } catch (error) {
-        console.log('등록 에러', error);
-        return 'error';
+        console.log("등록 에러", error);
+        return "error";
       }
     }
   };
@@ -118,25 +118,7 @@ const Index = () => {
 
   const handleDelete = async () => {
     const userConfirmed = window.confirm(
-      '1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다.'
-    );
-
-    if (userConfirmed) {
-      try {
-        await axios.delete(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/inquiries/${id}`
-        );
-        navigate('/askList');
-        navigate(0);
-      } catch (error) {
-        alert('오류가 발생했습니다.');
-      }
-    }
-  };
-
-  const handleCancle = () => {
-    const userConfirmed = window.confirm(
-      '작성을 취소하시겠나요? 작성 중인 글은 저장되지 않습니다.'
+      "1:1문의를 삭제하시겠나요? 삭제한 글은 복구되지 않습니다."
     );
 
     if (userConfirmed) {
@@ -230,16 +212,16 @@ const Index = () => {
             result = await handleUpdate();
           }
 
-          if (result === 'error') {
+          if (result === "error") {
             setIsLoading(false);
-            alert('오류가 발생했습니다.');
+            alert("오류가 발생했습니다.");
             return;
           }
 
           setIsLoading(false);
           navigate(0);
           if (!id) {
-            navigate('/askList');
+            navigate("/askList");
           }
         } catch (error) {
           console.log(error);
@@ -299,10 +281,6 @@ const AskForm = ({
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
-
-  const today = `${year}-${month >= 10 ? month : '0' + month}-${
-    day >= 10 ? day : '0' + day
-  }`;
 
   const today = `${year}-${month >= 10 ? month : "0" + month}-${
     day >= 10 ? day : "0" + day
