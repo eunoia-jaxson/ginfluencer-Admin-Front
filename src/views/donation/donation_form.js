@@ -24,7 +24,7 @@ const DonationForm = ({ onSubmit }) => {
     totalDonation: 0,
     totalCount: 0,
     totalSpend: 0,
-    totalChildrenCount: 0, // 추가된 상태 필드
+    totalChildrenCount: 0,
   });
 
   useEffect(() => {

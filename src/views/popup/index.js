@@ -39,7 +39,12 @@ const PopupList = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/all/popups/visible` //공개된 팝업만
+        `${process.env.REACT_APP_BASE_URL}/api/admin/popups`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("refreshToken")}`,
+          },
+        }
       );
       if (response.status === 200) {
         console.log("Fetched popups:", response.data);
@@ -55,151 +60,6 @@ const PopupList = () => {
   useEffect(() => {
     fetchPopups(); // Fetch popups on component mount
   }, []);
-
-  const fetchPopupById = async (id) => {
-    if (!id) return;
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`
-      );
-      if (response.status === 200) {
-        setSelectedPopup(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch popup:", error);
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const url = selectedPopup.id
-        ? `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${selectedPopup.id}`
-        : `${process.env.REACT_APP_BASE_URL}/api/admin/popups`;
-      const method = selectedPopup.id ? "patch" : "post";
-
-      await axios[method](url, selectedPopup);
-      alert("팝업이 성공적으로 저장되었습니다.");
-      fetchPopups();
-      navigate("/post?type=popup"); // 리스트로 돌아가기
-    } catch (error) {
-      console.error("Error saving popup:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchPopupById(id);
-    } else {
-      setSelectedPopup(null); // 새로운 폼을 위한 초기화
-    }
-  }, [id]);
-
-  useEffect(() => {
-    console.log("Updated popupList:", popupList);
-  }, [popupList]);
-
-  useEffect(() => {
-    const fetchSelectedPopup = async () => {
-      if (id) {
-        setIsLoading(true);
-        try {
-          const result = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`
-          );
-          console.log("Fetched selected popup data:", result.data);
-          setSelectedPopup({
-            id: result.id,
-            content: result.content,
-            title: result.title,
-            startDate: result.startDate.split("T")[0],
-            endDate: result.endDate.split("T")[0],
-            isVisible: result.isVisible,
-          });
-          setFiles(
-            result.popUpFiles.map((file) => ({
-              id: file.id,
-              oriName: file.originalFileName,
-              realName: file.filePath.split("/").pop(),
-              state: "server",
-              type: "server",
-              filePath: file.filePath,
-            }))
-          );
-        } catch (error) {
-          console.error("Failed to fetch popup:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchSelectedPopup();
-  }, [id]);
-
-  const handleFileChange = (event) => {
-    const newFiles = Array.from(event.target.files).map((file) => ({
-      id: null,
-      oriName: file.name,
-      realName: file.name,
-      state: "new",
-      type: "local",
-      file,
-    }));
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  };
-
-  const handleDeleteFileChange = (index) => {
-    const fileToDelete = files[index];
-    if (fileToDelete.type === "server") {
-      setDeletedFiles((prev) => [...prev, fileToDelete.id]);
-    }
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedPopup({ ...selectedPopup, [name]: value });
-  };
-
-  const handleVisibilityChange = () => {
-    setSelectedPopup((prev) => ({ ...prev, isVisible: !prev.isVisible }));
-  };
-
-  const handleSubmit = async () => {
-    console.log("Selected Popup Data:", selectedPopup); // Add this line to inspect the data before submission
-    if (
-      !selectedPopup.title ||
-      typeof selectedPopup.isVisible !== "boolean" ||
-      !selectedPopup.content
-    ) {
-      alert("모든 필수 항목을 입력해주세요.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      if (!id) {
-        await axios.post(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/popups`,
-          selectedPopup
-        );
-        alert("팝업이 성공적으로 등록되었습니다.");
-        fetchPopups(); // Reload the popup list after submitting
-      } else {
-        await axios.patch(
-          `${process.env.REACT_APP_BASE_URL}/api/admin/popups/${id}`,
-          selectedPopup
-        );
-        alert("팝업이 성공적으로 수정되었습니다.");
-      }
-      navigate("/post?type=popup");
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <Box id="white-box" flex="1" bg="white" p={4}>

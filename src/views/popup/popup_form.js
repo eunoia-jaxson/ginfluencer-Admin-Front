@@ -343,6 +343,11 @@ const Index = () => {
       alert("모든 필수 항목을 입력해주세요.");
       return;
     }
+    if (id) {
+      await handleUpdate(); // 팝업 업데이트를 처리
+    } else {
+      await handleCreate(); // 팝업 생성을 처리
+    }
   };
 
   return (

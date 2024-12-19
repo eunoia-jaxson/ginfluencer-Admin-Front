@@ -67,8 +67,16 @@ const StoreList = () => {
   // 데이터 불러오기 API 함수
   const fetchAllStores = async () => {
     try {
-      const response = await axiosInstance.get("/api/admin/stores/get/all");
-      console.log("response:", response.data); // 데이터 확인
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/admin/stores/get/all`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("refreshToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("response:", response.data);
       if (Array.isArray(response.data)) {
         setStores(
           response.data.map((store) => ({
@@ -120,7 +128,6 @@ const StoreList = () => {
         `${process.env.REACT_APP_BASE_URL}/api/admin/stores/create`,
         storeData
       );
-      fetchAllStores(); // 등록 후 목록을 갱신
       return response.data;
     } catch (error) {
       console.error("Error creating store:", error);

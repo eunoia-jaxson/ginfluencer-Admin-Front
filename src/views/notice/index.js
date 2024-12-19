@@ -1,21 +1,21 @@
-import { Box, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
-import NoticeForm from './notice_form';
-import AdminTitle from '../../components/common/AdminTitle';
-import { useMatch, useNavigate } from 'react-router-dom';
-import { NOTICE_TABLE_LAYOUT, PAGE_SIZE } from '../../constants/admin';
-import { useState, useEffect } from 'react';
-import PageButtonList from '../../components/common/PageButtonList';
-import axios from 'axios';
+import { Box, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
+import NoticeForm from "./notice_form";
+import AdminTitle from "../../components/common/AdminTitle";
+import { useMatch, useNavigate } from "react-router-dom";
+import { NOTICE_TABLE_LAYOUT, PAGE_SIZE } from "../../constants/admin";
+import { useState, useEffect } from "react";
+import PageButtonList from "../../components/common/PageButtonList";
+import axios from "axios";
 
 const NoticeList = () => {
   const [notices, setNotices] = useState([]);
   const [curPages, setCurPages] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const match = useMatch('/noticeList/noticeForm');
+  const match = useMatch("/noticeList/noticeForm");
   const navigate = useNavigate();
   const layout = NOTICE_TABLE_LAYOUT;
-  const form = 'noticeForm';
+  const form = "noticeForm";
 
   const handlePaginationNumber = (e) => {
     setCurPages(e.target.innerText - 1);
@@ -25,7 +25,7 @@ const NoticeList = () => {
     if (curPages > 0) {
       setCurPages(curPages - 1);
     } else {
-      alert('첫 페이지 입니다.');
+      alert("첫 페이지 입니다.");
     }
   };
 
@@ -33,7 +33,7 @@ const NoticeList = () => {
     if (curPages < totalPages - 1) {
       setCurPages(curPages + 1);
     } else {
-      alert('마지막 페이지 입니다.');
+      alert("마지막 페이지 입니다.");
     }
   };
 
@@ -43,7 +43,7 @@ const NoticeList = () => {
         `${process.env.REACT_APP_BASE_URL}/api/admin/announcements`,
         {
           headers: {
-            Authorization: `${localStorage.getItem('refreshToken')}`,
+            Authorization: `${localStorage.getItem("refreshToken")}`,
           },
         }
       );
@@ -104,17 +104,17 @@ const NoticeList = () => {
                   key={item.id}
                   borderBottomWidth="1px"
                   borderColor="gray.300"
-                  _hover={{ bg: 'gray.50' }}
+                  _hover={{ bg: "gray.50" }}
                 >
                   {layout.map(({ name }) => {
                     const value = item[name];
                     let tableValue = item[name];
 
-                    if (name === 'category') {
+                    if (name === "category") {
                       tableValue = value;
-                    } else if (name === 'createdDate') {
+                    } else if (name === "createdDate") {
                       tableValue = value.slice(0, 10);
-                    } else if (name === 'id') {
+                    } else if (name === "id") {
                       return (
                         <Td
                           key={name}
