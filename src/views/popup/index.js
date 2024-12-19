@@ -34,13 +34,15 @@ const PopupList = () => {
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
+  // Fetch popups function
   const fetchPopups = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/popups`
+        `${process.env.REACT_APP_BASE_URL}/api/all/popups/visible` //공개된 팝업만
       );
       if (response.status === 200) {
+        console.log("Fetched popups:", response.data);
         setPopupList(response.data);
       }
     } catch (error) {
@@ -49,6 +51,10 @@ const PopupList = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPopups(); // Fetch popups on component mount
+  }, []);
 
   const fetchPopupById = async (id) => {
     if (!id) return;
@@ -88,11 +94,6 @@ const PopupList = () => {
       setSelectedPopup(null); // 새로운 폼을 위한 초기화
     }
   }, [id]);
-
-  // 전체 데이터 초기 로드
-  useEffect(() => {
-    fetchPopups();
-  }, []);
 
   useEffect(() => {
     console.log("Updated popupList:", popupList);

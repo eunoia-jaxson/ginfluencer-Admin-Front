@@ -364,7 +364,7 @@ const StoreList = () => {
   return (
     <Box id="white-box" flex="1" bg="white" p={4}>
       <AdminTitle
-        hasAddButton={!match}
+        hasAddButton={false}
         title="선한영향력가게 관리"
         form={form}
       />
@@ -407,7 +407,7 @@ const StoreList = () => {
             />
             <SearchBar onSubmit={handleSubmit} onChange={handleChange} />
           </Box>
-          <Table variant="simple" bg="white" borderWidth="1px">
+          <Table variant="simple" bg="white" borderWidth="1px" mt={4}>
             <Thead bg="gray.100" borderTopWidth="2px" borderColor="black">
               <Tr>
                 <Th

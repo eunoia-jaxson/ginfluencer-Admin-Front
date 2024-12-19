@@ -11,8 +11,8 @@ const AdminHeader = ({ title, hasAddButton, form }) => {
       </Heading>
       {hasAddButton && (
         <Button
-          px={6} // Tailwind의 px-6를 Chakra UI의 padding 속성으로 대체
-          py={2} // Tailwind의 py-2를 Chakra UI의 padding 속성으로 대체
+          px={6}
+          py={2}
           onClick={() => navigate(form)}
           bg="main"
           color="white"
