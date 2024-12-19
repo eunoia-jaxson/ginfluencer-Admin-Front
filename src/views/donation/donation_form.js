@@ -24,23 +24,34 @@ const DonationForm = ({ onSubmit }) => {
     totalDonation: 0,
     totalCount: 0,
     totalSpend: 0,
+    totalChildrenCount: 0, // 추가된 상태 필드
   });
 
   useEffect(() => {
     const fetchDonationData = async () => {
       try {
-        const response = await axios.get(
+        // 첫 번째 API 호출: 기부 데이터
+        const donationResponse = await axios.get(
           `${process.env.REACT_APP_BASE_URL}/api/all/donations`
         );
-        const data = response.data;
+        const donationData = donationResponse.data;
+
+        // 두 번째 API 호출: 총 후원아동 수
+        const childrenResponse = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/api/all/donations/total-children-count`
+        );
+        const childrenData = childrenResponse.data;
+
+        // 상태 업데이트
         setDonation({
-          id: data.id || idCounter++,
-          totalDonation: data.totalDonation || 0,
-          totalCount: data.totalCount || 0,
-          totalSpend: data.totalSpend || 0,
+          id: donationData.id || idCounter++,
+          totalDonation: donationData.totalDonation || 0,
+          totalCount: donationData.totalCount || 0,
+          totalSpend: donationData.totalSpend || 0,
+          totalChildrenCount: childrenData.totalChildrenCount || 0, // 별도 API 데이터 추가
         });
       } catch (error) {
-        console.error("기부금 정보를 가져오는 데 실패했습니다:", error);
+        console.error("데이터를 가져오는 데 실패했습니다:", error);
         alert("기부금 정보를 가져오는 데 실패했습니다.");
       }
     };
@@ -136,6 +147,26 @@ const DonationForm = ({ onSubmit }) => {
                   value={donation.totalSpend}
                   onChange={(valueString) =>
                     handleInputChange("totalSpend", valueString)
+                  }
+                  min={0}
+                  borderColor="gray.300"
+                  focusBorderColor="blue.300"
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </Td>
+            </Tr>
+            <Tr>
+              <Th>총 후원아동 수</Th>
+              <Td>
+                <NumberInput
+                  value={donation.totalChildrenCount}
+                  onChange={(valueString) =>
+                    handleInputChange("totalChildrenCount", valueString)
                   }
                   min={0}
                   borderColor="gray.300"
