@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,9 +12,9 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-} from "@chakra-ui/react";
-import AdminTitle from "../../components/common/AdminTitle";
-import axios from "axios";
+} from '@chakra-ui/react';
+import AdminTitle from '../../components/common/AdminTitle';
+import axios from 'axios';
 
 let idCounter = 1;
 
@@ -51,8 +51,8 @@ const DonationForm = ({ onSubmit }) => {
           totalChildrenCount: childrenData.totalChildrenCount || 0, // 별도 API 데이터 추가
         });
       } catch (error) {
-        console.error("데이터를 가져오는 데 실패했습니다:", error);
-        alert("기부금 정보를 가져오는 데 실패했습니다.");
+        console.error('데이터를 가져오는 데 실패했습니다:', error);
+        alert('기부금 정보를 가져오는 데 실패했습니다.');
       }
     };
 
@@ -66,20 +66,25 @@ const DonationForm = ({ onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("저장된 기부금 정보:", donation);
+    console.log('저장된 기부금 정보:', donation);
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BASE_URL}/api/admin/donations`,
-        donation
+        donation,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('refreshToken')}`,
+          },
+        }
       );
       setDonation((prev) => ({ ...prev, id: response.data.id }));
 
-      alert("기부금 정보가 저장되었습니다.");
+      alert('기부금 정보가 저장되었습니다.');
       if (onSubmit) onSubmit();
     } catch (error) {
       console.error(error);
-      alert("기부금 정보 저장에 실패했습니다.");
+      alert('기부금 정보 저장에 실패했습니다.');
     }
   };
 
@@ -106,7 +111,7 @@ const DonationForm = ({ onSubmit }) => {
                 <NumberInput
                   value={donation.totalDonation}
                   onChange={(valueString) =>
-                    handleInputChange("totalDonation", valueString)
+                    handleInputChange('totalDonation', valueString)
                   }
                   min={0}
                   borderColor="gray.300"
@@ -126,7 +131,7 @@ const DonationForm = ({ onSubmit }) => {
                 <NumberInput
                   value={donation.totalCount}
                   onChange={(valueString) =>
-                    handleInputChange("totalCount", valueString)
+                    handleInputChange('totalCount', valueString)
                   }
                   min={0}
                   borderColor="gray.300"
@@ -146,7 +151,7 @@ const DonationForm = ({ onSubmit }) => {
                 <NumberInput
                   value={donation.totalSpend}
                   onChange={(valueString) =>
-                    handleInputChange("totalSpend", valueString)
+                    handleInputChange('totalSpend', valueString)
                   }
                   min={0}
                   borderColor="gray.300"
@@ -166,7 +171,7 @@ const DonationForm = ({ onSubmit }) => {
                 <NumberInput
                   value={donation.totalChildrenCount}
                   onChange={(valueString) =>
-                    handleInputChange("totalChildrenCount", valueString)
+                    handleInputChange('totalChildrenCount', valueString)
                   }
                   min={0}
                   borderColor="gray.300"
